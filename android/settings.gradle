@@ -1,0 +1,3 @@
+rootProject.name = 'NowplayApp'
+
+include ':app'
