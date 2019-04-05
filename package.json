@@ -9,16 +9,24 @@
   },
   "dependencies": {
     "apollo-boost": "^0.3.1",
+    "formik": "^1.5.2",
     "graphql": "^14.2.0",
+    "joi": "^14.3.1",
+    "joi-phone-number": "^2.1.1",
+    "joi-react-native": "^2.0.1",
     "prop-types": "^15.7.2",
     "react": "16.8.3",
     "react-apollo": "^2.5.3",
     "react-native": "0.59.2",
+    "react-native-elements": "^1.1.0",
+    "react-native-vector-icons": "^6.4.2",
     "react-navigation": "^3.5.1",
     "react-redux": "^6.0.1",
     "redux": "^4.0.1",
+    "redux-offline": "^2.0.0",
     "redux-persist": "^5.10.0",
-    "redux-saga": "^1.0.2"
+    "redux-saga": "^1.0.2",
+    "yup": "^0.27.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
