@@ -10,7 +10,7 @@ import {Formik} from 'formik';
 import * as Yup from 'yup';
 import CustomInput from '../CustomInput'
 
-const Signup = (props) => {
+const Register = (props) => {
     function _handleSubmit(values, bag, loginMutation) {
         const {username, password} = values;
         loginMutation({
@@ -43,10 +43,13 @@ const Signup = (props) => {
             {(loginMutation, {loading, error, data, client}) => (
                 <View style={styles.container}>
                     <Formik
-                        initialValues={{username: '', password: ''}}
+                        initialValues={{username: '', password: '', phoneNumber: ''}}
                         onSubmit={(values, bag) => _handleSubmit(values, bag, loginMutation)}
                         validationSchema={Yup.object().shape({
                             username: Yup.string()
+                                .matches(/^[a-zA-Z0-9_]+$/, 'Not a valid username')
+                                .required('Username is required'),
+                            phoneNumber: Yup.string()
                                 .matches(/^[a-zA-Z0-9_]+$/, 'Not a valid username')
                                 .required('Username is required'),
                             password: Yup.string()
@@ -79,6 +82,22 @@ const Signup = (props) => {
                                     onTouch={setFieldTouched}
                                     name="username"
                                     error={touched.username && errors.username}
+                                />
+                                <CustomInput
+                                    placeholder='Phone Number'
+                                    leftIcon={
+                                        <Icon
+                                            name='user'
+                                            size={24}
+                                            color='black'
+                                        />
+                                    }
+                                    autoCapitalize="none"
+                                    value={values.phoneNumber}
+                                    onChange={setFieldValue}
+                                    onTouch={setFieldTouched}
+                                    name="username"
+                                    error={touched.phoneNumber && errors.phoneNumber}
                                 />
                                 <CustomInput
                                     placeholder='Password'
@@ -127,5 +146,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Signup
+export default Register
 
