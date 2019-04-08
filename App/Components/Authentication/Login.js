@@ -19,8 +19,10 @@ const Login = (props) => {
                 password
             }
         })
+            .then(d => console.log(d))
             .catch(
                 error => {
+                    console.log(error)
                     bag.setSubmitting(false);
                     let message = error.message.split(':');
                     bag.setErrors(JSON.parse(message[1] + ':' + message[2]));
@@ -32,6 +34,7 @@ const Login = (props) => {
         <Mutation
             mutation={login}
             update={(cache, {data: {login: {token}}}) => {
+                console.log(token);
                 cache.writeQuery({
                     query: GET_TOKEN,
                     data: {token}

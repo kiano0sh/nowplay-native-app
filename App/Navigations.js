@@ -5,6 +5,8 @@ import {GET_TOKEN} from "./Queries/CacheQueries";
 import Login from './Components/Authentication/Login'
 import Register from './Components/Authentication/Register'
 import Dashboard from './Components/Dashboard/Dashboard'
+import GoogleMapScreen from './Components/GoogleMap/GoogleMapScreen'
+import OpenStreetMapScreen from './Components/OpenstreetMap/OpenStreetMapScreen'
 import {ActivityIndicator, StatusBar, View, StyleSheet} from 'react-native';
 
 class AuthLoadingScreen extends React.Component {
@@ -41,7 +43,7 @@ const styles = StyleSheet.create({
     },
 });
 
-const AppStack = createStackNavigator({ Home: Dashboard});
+const AppStack = createStackNavigator({ Home: GoogleMapScreen});
 const AuthStack = createStackNavigator({ Login });
 
 const Navigations = createAppContainer(createSwitchNavigator(

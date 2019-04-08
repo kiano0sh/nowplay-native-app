@@ -6,7 +6,7 @@ import {GET_TOKEN} from "./Queries/CacheQueries";
 
 export const client = new ApolloClient({
     link: new HttpLink({
-        uri: 'http://192.168.1.36:4000',
+        uri: 'http://192.168.1.33:4000',
     }),
     cache: new InMemoryCache()
 });
