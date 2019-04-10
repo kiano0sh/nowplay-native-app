@@ -20,7 +20,6 @@
     "react-apollo": "^2.5.3",
     "react-native": "0.59.2",
     "react-native-elements": "^1.1.0",
-    "react-native-geolocation-service": "^2.0.0",
     "react-native-gesture-handler": "^1.1.0",
     "react-native-maps": "https://github.com/react-native-community/react-native-maps/archive/v0.24-rc1.tar.gz",
     "react-native-vector-icons": "^6.4.2",

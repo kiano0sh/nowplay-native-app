@@ -6,6 +6,7 @@ import Login from './Components/Authentication/Login'
 import Register from './Components/Authentication/Register'
 import Dashboard from './Components/Dashboard/Dashboard'
 import GoogleMapScreen from './Components/GoogleMap/GoogleMapScreen'
+import ChooseMusic from './Components/MusicMark/ChooseMusic'
 import OpenStreetMapScreen from './Components/OpenstreetMap/OpenStreetMapScreen'
 import {ActivityIndicator, StatusBar, View, StyleSheet} from 'react-native';
 import {waitOnCache} from "./ApolloClient";
@@ -44,7 +45,10 @@ const styles = StyleSheet.create({
     },
 });
 
-const AppStack = createStackNavigator({ Home: GoogleMapScreen});
+const AppStack = createStackNavigator({
+    Home: GoogleMapScreen,
+    ChooseMusic
+});
 const AuthStack = createStackNavigator({ Login });
 
 const Navigations = createAppContainer(createSwitchNavigator(
