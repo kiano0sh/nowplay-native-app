@@ -15,7 +15,7 @@ export const waitOnCache = persistCache({
 
 export const client = new ApolloClient({
     link: new HttpLink({
-        uri: 'http://192.168.1.33:4000',
+        uri: 'http://192.168.1.37:4000',
     }),
     cache
 });
