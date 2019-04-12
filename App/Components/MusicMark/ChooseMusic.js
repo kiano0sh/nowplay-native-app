@@ -16,7 +16,8 @@ class MusicMark extends React.Component {
             results: null,
             collection: [],
             loading: false,
-            buttonLoading: false,
+            // TODO after pressing clear button while data is fetching an amount of data remains in state!
+            // clear: false,
             page: 0
         }
     }
@@ -55,13 +56,14 @@ class MusicMark extends React.Component {
                     results: null,
                     collection: [],
                     loading: false,
-                    page: 0
+                    page: 0,
+                    // clear: true
                 }
             })
         }
     };
 
-    _keyExtractor = (item, index) => item.id;
+    _keyExtractor = (item, index) => index;
 
     renderItem = ({item}) => (
         <ListItem
@@ -81,30 +83,43 @@ class MusicMark extends React.Component {
     );
 
     _nextPage = () => {
-        let {search, page, results, collection} = this.state;
-        let nextPage = page + 1;
-        this.setState((state, props) => {
-            return {
-                buttonLoading: true
-            }
-        });
-        console.log(this.state.collection, 'p')
-        soundcloudSearch(search, nextPage).then(nextPageResults => {
-            console.log(nextPageResults.collection, 'n')
+        let {search, page, results, collection, clear} = this.state;
+        if (!!results.next_href && !!search) {
+            let nextPage = page + 1;
             this.setState((state, props) => {
                 return {
-                    results: nextPageResults,
-                    collection: [...collection, ...nextPageResults.collection],
-                    buttonLoading: false,
-                    page: nextPage
+                    loading: true
                 }
+            });
+            soundcloudSearch(search, nextPage).then(nextPageResults => {
+                this.setState((state, props) => {
+                    return {
+                        results: nextPageResults,
+                        collection: [...collection, ...nextPageResults.collection],
+                        loading: false,
+                        page: nextPage
+                    }
+                });
+                // if (clear) {
+                //     this.setState((state, props) => {
+                //         return {
+                //             results: null,
+                //             collection: [],
+                //             page: 0,
+                //             clear: false
+                //         }
+                //     })
+                // }
             })
-        })
+        } else {
+
+        }
+
         // .catch(error => this.setState({nextPageError: error.message, buttonLoading: false}))
     };
 
     render() {
-        const {search, loading, results, buttonLoading, collection} = this.state;
+        const {search, loading, collection} = this.state;
         return (
             <View>
                 <SearchBar
@@ -117,7 +132,9 @@ class MusicMark extends React.Component {
                         () => this.setState((state, props) => {
                             return {
                                 results: null,
-                                page: 0
+                                collection: [],
+                                page: 0,
+                                // clear: true
                             }
                         })
                     }
@@ -127,13 +144,13 @@ class MusicMark extends React.Component {
                     !!collection && !!collection.length &&
                     <FlatList
                         keyExtractor={this._keyExtractor}
-                        data={results.collection}
+                        data={collection}
                         renderItem={this.renderItem}
                         extraData={this.state}
-                        ListHeaderComponent={
-                             <Button title={'title'} onPress={() => {console.log(this.state);return this._nextPage()}}/>
-                        }
-
+                        onEndReached={() => this._nextPage()}
+                        // ListFooterComponent={
+                        //      <Button title={'title'} onPress={() => {console.log(this.state);return this._nextPage()}}/>
+                        // }
                     />
                 }
                 {/*<Button*/}
