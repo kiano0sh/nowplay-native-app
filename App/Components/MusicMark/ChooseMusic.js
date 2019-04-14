@@ -5,7 +5,7 @@ import {
     FlatList,
     Button,
 } from 'react-native';
-import {SearchBar, ListItem, Text} from "react-native-elements";
+import {SearchBar, ListItem, Text, Image} from "react-native-elements";
 import {soundcloudSearch} from "../../API/Soundcloud/soundcloudHelper";
 
 class MusicMark extends React.Component {
@@ -24,6 +24,13 @@ class MusicMark extends React.Component {
 
     static navigationOptions = {
         title: 'Choose Music',
+        headerStyle: {
+            backgroundColor: '#393e42',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+            fontWeight: 'bold',
+        },
     };
 
     componentDidMount(): void {
@@ -70,17 +77,23 @@ class MusicMark extends React.Component {
             title={item.title}
             subtitle={
                 <View>
-                    <Text style={styles.sourceText} numberOfLines={1}>Powered by soundcloud. Posted
-                        by {item.user.username}.</Text>
+                    <Text style={styles.sourceText} numberOfLines={1}>From Soundcloud by {item.user.username}.</Text>
                 </View>
             }
+            titleStyle={{ color: 'white', fontWeight: 'bold' }}
             leftAvatar={{
                 source: !!item.artwork_url ? {uri: item.artwork_url} : {uri: item.user.avatar_url},
                 rounded: false,
+                size: 'large',
             }}
             bottomDivider
+            containerStyle={{backgroundColor: '#121619'}}
         />
     );
+
+    CustomImageComponent = (item) => {
+        return <Image source={!!item.artwork_url ? {uri: item.artwork_url} : {uri: item.user.avatar_url}}/>
+    };
 
     _nextPage = () => {
         let {search, page, results, collection, clear} = this.state;
@@ -191,6 +204,6 @@ const styles = StyleSheet.create({
         paddingTop: 5
     },
     sourceText: {
-        color: 'grey',
+        color: 'white',
     }
 });
