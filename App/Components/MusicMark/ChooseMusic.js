@@ -6,7 +6,10 @@ import {
     Button,
 } from 'react-native';
 import {SearchBar, ListItem, Text, Image} from "react-native-elements";
-import {soundcloudSearch} from "../../API/Soundcloud/soundcloudHelper";
+import {Mutation} from "react-apollo";
+import {soundcloudSearch, streamUrl} from "../../API/Soundcloud/soundcloudHelper";
+import {client} from "../../ApolloClient";
+import {GET_CURRENT_SONGS, GET_TOKEN} from '../../Queries/CacheQueries'
 
 class MusicMark extends React.Component {
     constructor(props, context) {
@@ -76,11 +79,16 @@ class MusicMark extends React.Component {
         <ListItem
             title={item.title}
             subtitle={
-                <View>
-                    <Text style={styles.sourceText} numberOfLines={1}>From Soundcloud by {item.user.username}.</Text>
+                <View style={styles.subtitleView}>
+                    <Text style={styles.soundcloudText} numberOfLines={1}>From Soundcloud by {item.user.username}.</Text>
                 </View>
             }
-            titleStyle={{ color: 'white', fontWeight: 'bold' }}
+            rightSubtitle={
+                <View style={styles.subtitleView}>
+                    <Text style={styles.musicDuration}>{(item.duration / 60000).toFixed(2).replace('.', ':')}</Text>
+                </View>
+            }
+            titleStyle={{color: 'white', fontWeight: 'bold'}}
             leftAvatar={{
                 source: !!item.artwork_url ? {uri: item.artwork_url} : {uri: item.user.avatar_url},
                 rounded: false,
@@ -88,11 +96,35 @@ class MusicMark extends React.Component {
             }}
             bottomDivider
             containerStyle={{backgroundColor: '#121619'}}
+            onPress={() => this._playMusic(item)}
         />
     );
 
-    CustomImageComponent = (item) => {
-        return <Image source={!!item.artwork_url ? {uri: item.artwork_url} : {uri: item.user.avatar_url}}/>
+    _playMusic = (music) => {
+        console.log(music)
+        console.log(client.cache)
+
+        let currentSongsQuery = client.cache.readQuery({ query: GET_CURRENT_SONGS });
+        console.log(currentSongsQuery)
+        let {currentSongs} = currentSongsQuery;
+
+        let currentSongsShadow = Object.assign([], currentSongs);
+        currentSongsShadow.push({
+            __typename: 'Music',
+            id: music.id,
+            streamUrl: streamUrl(music.uri),
+            title: music.title,
+            artwork_url: !!music.artwork_url ? music.artwork_url : music.user.avatar_url,
+            duration: music.duration,
+            username: music.user.username
+        });
+
+        console.log(currentSongsShadow)
+
+        client.cache.writeData({ data: { currentSongs: currentSongsShadow} })
+
+        console.log(client.cache.readQuery({ query: GET_CURRENT_SONGS }), 'after')
+
     };
 
     _nextPage = () => {
@@ -200,10 +232,13 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
     },
     subtitleView: {
-        flexDirection: 'row',
-        paddingTop: 5
+        // flexDirection: 'row',
+        // justifyContent: 'space-between'
     },
-    sourceText: {
+    soundcloudText: {
+        color: 'white',
+    },
+    musicDuration: {
         color: 'white',
     }
 });

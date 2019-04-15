@@ -7,8 +7,10 @@ export const GET_TOKEN = gql`
 `;
 
 export const GET_CURRENT_SONGS = gql`
-    query GetCurrentSongs {
-        currentSongs @client
+    {
+        currentSongs @client {
+            id
+        }
     }
 `;
 
