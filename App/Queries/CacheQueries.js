@@ -10,6 +10,11 @@ export const GET_CURRENT_SONGS = gql`
     {
         currentSongs @client {
             id
+            streamUrl
+            title
+            artwork_url
+            duration
+            username
         }
     }
 `;

@@ -80,7 +80,8 @@ class MusicMark extends React.Component {
             title={item.title}
             subtitle={
                 <View style={styles.subtitleView}>
-                    <Text style={styles.soundcloudText} numberOfLines={1}>From Soundcloud by {item.user.username}.</Text>
+                    <Text style={styles.soundcloudText} numberOfLines={1}>From Soundcloud
+                        by {item.user.username}.</Text>
                 </View>
             }
             rightSubtitle={
@@ -100,30 +101,46 @@ class MusicMark extends React.Component {
         />
     );
 
+    // handling musics stack
     _playMusic = (music) => {
-        console.log(music)
-        console.log(client.cache)
 
-        let currentSongsQuery = client.cache.readQuery({ query: GET_CURRENT_SONGS });
-        console.log(currentSongsQuery)
+        let currentSongsQuery = client.cache.readQuery({query: GET_CURRENT_SONGS});
+        // console.log(currentSongsQuery, 'main');
+
         let {currentSongs} = currentSongsQuery;
 
         let currentSongsShadow = Object.assign([], currentSongs);
-        currentSongsShadow.push({
-            __typename: 'Music',
-            id: music.id,
-            streamUrl: streamUrl(music.uri),
-            title: music.title,
-            artwork_url: !!music.artwork_url ? music.artwork_url : music.user.avatar_url,
-            duration: music.duration,
-            username: music.user.username
-        });
 
-        console.log(currentSongsShadow)
 
-        client.cache.writeData({ data: { currentSongs: currentSongsShadow} })
+        if(currentSongsShadow.length >= 31) {
+            currentSongsShadow.shift()
+        }
 
-        console.log(client.cache.readQuery({ query: GET_CURRENT_SONGS }), 'after')
+        let wantedSong = false;
+        if (currentSongsShadow.length) {
+            wantedSong = currentSongsShadow.find(song => song.id === music.id);
+        }
+        if (!!wantedSong) {
+            let tempSongList = currentSongsShadow.filter(song => song.id !== music.id);
+            tempSongList.push(wantedSong);
+            currentSongsShadow = tempSongList
+        } else {
+            currentSongsShadow.push({
+                __typename: 'Music',
+                id: music.id,
+                streamUrl: streamUrl(music.uri),
+                title: music.title,
+                artwork_url: !!music.artwork_url ? music.artwork_url : music.user.avatar_url,
+                duration: music.duration,
+                username: music.user.username
+            });
+        }
+
+        // console.log(currentSongsShadow);
+
+        client.cache.writeData({data: {currentSongs: currentSongsShadow}});
+
+        console.log(client.cache.readQuery({query: GET_CURRENT_SONGS}), 'after')
 
     };
 
