@@ -37,10 +37,12 @@ export const client = new ApolloClient({
     }
 });
 
+// initialize cache
 cache.writeData({
     data: {
         token: null,
-        currentSongs: []
+        currentSongs: [],
+        playStatus: false
     }
 });
 

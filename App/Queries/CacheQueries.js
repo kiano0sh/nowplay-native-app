@@ -6,6 +6,12 @@ export const GET_TOKEN = gql`
     }
 `;
 
+export const GET_PLAY_STATUS = gql`
+    {
+        playStatus @client
+    }
+`;
+
 export const GET_CURRENT_SONGS = gql`
     {
         currentSongs @client {

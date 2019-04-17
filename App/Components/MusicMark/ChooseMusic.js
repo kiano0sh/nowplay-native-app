@@ -9,7 +9,8 @@ import {SearchBar, ListItem, Text, Image} from "react-native-elements";
 import {Mutation} from "react-apollo";
 import {soundcloudSearch, streamUrl} from "../../API/Soundcloud/soundcloudHelper";
 import {client} from "../../ApolloClient";
-import {GET_CURRENT_SONGS, GET_TOKEN} from '../../Queries/CacheQueries'
+import {GET_CURRENT_SONGS, GET_PLAY_STATUS} from '../../Queries/CacheQueries'
+
 
 class MusicMark extends React.Component {
     constructor(props, context) {
@@ -97,15 +98,13 @@ class MusicMark extends React.Component {
             }}
             bottomDivider
             containerStyle={{backgroundColor: '#121619'}}
-            onPress={() => this._playMusic(item)}
+            onPress={() => this._updateStack(item)}
         />
     );
 
     // handling musics stack
-    _playMusic = (music) => {
-
+    _updateStack = (music) => {
         let currentSongsQuery = client.cache.readQuery({query: GET_CURRENT_SONGS});
-        // console.log(currentSongsQuery, 'main');
 
         let {currentSongs} = currentSongsQuery;
 
@@ -136,11 +135,18 @@ class MusicMark extends React.Component {
             });
         }
 
-        // console.log(currentSongsShadow);
+        client.writeQuery({
+            query: GET_CURRENT_SONGS,
+            data: {currentSongs: currentSongsShadow}
+        });
 
-        client.cache.writeData({data: {currentSongs: currentSongsShadow}});
+        client.writeQuery({
+            query: GET_PLAY_STATUS,
+            data: {playStatus: true}
+        });
 
         console.log(client.cache.readQuery({query: GET_CURRENT_SONGS}), 'after')
+        console.log(client.cache.readQuery({query: GET_PLAY_STATUS}), 'after')
 
     };
 
