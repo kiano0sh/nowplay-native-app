@@ -9,7 +9,8 @@ import {SearchBar, ListItem, Text, Image} from "react-native-elements";
 import {Mutation} from "react-apollo";
 import {soundcloudSearch, streamUrl} from "../../API/Soundcloud/soundcloudHelper";
 import {client} from "../../ApolloClient";
-import {GET_CURRENT_SONGS, GET_PLAY_STATUS} from '../../Queries/CacheQueries'
+import {GET_CURRENT_SONGS, GET_CURRENT_SONG, GET_PLAY_STATUS, PLAY_CURRENT_SONG} from '../../Queries/CacheQueries'
+import { withApollo } from 'react-apollo';
 
 
 class MusicMark extends React.Component {
@@ -141,9 +142,17 @@ class MusicMark extends React.Component {
         });
 
         client.writeQuery({
-            query: GET_PLAY_STATUS,
-            data: {playStatus: true}
+            query: GET_CURRENT_SONG,
+            data: {currentSong: currentSongsShadow[currentSongsShadow.length - 1]}
         });
+
+        console.log(this.props);
+        this.props.client.mutate({mutation: PLAY_CURRENT_SONG});
+
+        // client.writeQuery({
+        //     query: GET_PLAY_STATUS,
+        //     data: {playStatus: true}
+        // });
 
         console.log(client.cache.readQuery({query: GET_CURRENT_SONGS}), 'after')
         console.log(client.cache.readQuery({query: GET_PLAY_STATUS}), 'after')
@@ -242,7 +251,7 @@ class MusicMark extends React.Component {
     }
 }
 
-export default MusicMark;
+export default withApollo(MusicMark);
 
 
 const styles = StyleSheet.create({

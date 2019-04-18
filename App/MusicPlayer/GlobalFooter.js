@@ -2,9 +2,17 @@ import React from 'react'
 import {StyleSheet, View} from 'react-native'
 import {Text, Card, Icon} from 'react-native-elements'
 import {Query} from "react-apollo";
-import {GET_PLAY_STATUS, GET_CURRENT_SONGS} from "../Queries/CacheQueries";
+import {
+    GET_PLAY_STATUS,
+    GET_CURRENT_SONGS,
+    GET_CURRENT_SONG,
+    PAUSE_CURRENT_SONG,
+    PLAY_CURRENT_SONG
+} from "../Queries/CacheQueries";
 import { graphql, compose} from 'react-apollo';
 import {client} from "../ApolloClient";
+import { withApollo } from 'react-apollo';
+
 
 
 class GlobalFooter extends React.Component {
@@ -21,22 +29,16 @@ class GlobalFooter extends React.Component {
     // }
 
     _playMusic() {
-        client.writeQuery({
-            query: GET_PLAY_STATUS,
-            data: {playStatus: true}
-        });
+        this.props.client.mutate({mutation: PLAY_CURRENT_SONG})
     }
 
     _pauseMusic() {
-        client.writeQuery({
-            query: GET_PLAY_STATUS,
-            data: {playStatus: false}
-        });
+        this.props.client.mutate({mutation: PAUSE_CURRENT_SONG})
     }
 
     render() {
         console.log(this.props);
-        const {playStatusQuery, currentSongsQuery} = this.props;
+        const {playStatusQuery, currentSongsQuery, currentSongQuery} = this.props;
         return (
             <View style={styles.container}>
                 <View style={styles.buttonContainer}>
@@ -70,9 +72,9 @@ class GlobalFooter extends React.Component {
                           numberOfLines={1}
                     >
                         {
-                            currentSongsQuery.currentSongs.length ?
+                            currentSongQuery.currentSong ?
                                 (
-                                    currentSongsQuery.currentSongs[currentSongsQuery.currentSongs.length - 1].title
+                                    currentSongQuery.currentSong.title
                                 )
                                 :
                                 (
@@ -120,8 +122,10 @@ const styles = StyleSheet.create({
 });
 
 export default compose(
+    withApollo,
     graphql(GET_PLAY_STATUS, {options: { fetchPolicy: 'cache-only' }, name: 'playStatusQuery'}),
     graphql(GET_CURRENT_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongsQuery'}),
+    graphql(GET_CURRENT_SONG, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongQuery'}),
     )(GlobalFooter)
 
 // {/*<View style={{backgroundColor: 'blue'}}>*/}

@@ -1,8 +1,8 @@
-import { ApolloClient, HttpLink, InMemoryCache } from 'apollo-boost';
+import {ApolloClient, HttpLink, InMemoryCache} from 'apollo-boost';
 import {GET_TOKEN} from "./Queries/CacheQueries";
-import { persistCache } from 'apollo-cache-persist';
-import { AsyncStorage } from 'react-native';
-import { GET_CURRENT_SONGS } from './Queries/CacheQueries'
+import {persistCache} from 'apollo-cache-persist';
+import {AsyncStorage} from 'react-native';
+import {GET_CURRENT_SONGS, GET_CURRENT_SONG, GET_PLAY_STATUS} from './Queries/CacheQueries'
 
 const cache = new InMemoryCache();
 
@@ -19,19 +19,47 @@ export const client = new ApolloClient({
     cache,
     resolvers: {
         Mutation: {
-            togglePlayStatus: (root, args, {cache, getCacheKey}) => {
-                const {index} = args;
-                let { currentSongs } = cache.readQuery({ query: GET_CURRENT_SONGS });
-                let playStatus = currentSongs[index].playStatus;
-                currentSongs[index].playStatus = !playStatus;
-                cache.writeData({currentSongs});
+            playCurrentSong: (root, args, {cache, client}) => {
+                client.writeQuery({
+                    query: GET_PLAY_STATUS,
+                    data: {playStatus: true}
+                });
                 return null
-                },
-            playNextSong: (root, args, {cache, getCacheKey}) => {
-
             },
-            playPreviousSong: (root, args, {cache, getCacheKey}) => {
-
+            pauseCurrentSong: (root, args, {cache, client}) => {
+                client.writeQuery({
+                    query: GET_PLAY_STATUS,
+                    data: {playStatus: false}
+                });
+                return null
+            },
+            playNextSong: (root, args, {cache, client}) => {
+                const currentSong = cache.readQuery({query: GET_CURRENT_SONG});
+                const currentSongs = cache.readQuery({query: GET_CURRENT_SONGS});
+                const currentSongIndex = currentSongs.indexOf(music => music.id === currentSong.id);
+                let newCurrentSong = currentSongs[currentSongIndex + 1];
+                if (!newCurrentSong) {
+                    newCurrentSong = currentSongs[0]
+                }
+                client.writeQuery({
+                    query: GET_CURRENT_SONG,
+                    data: {currentSong: newCurrentSong}
+                });
+                return null
+            },
+            playPreviousSong: (root, args, {cache, client}) => {
+                const currentSong = cache.readQuery({query: GET_CURRENT_SONG});
+                const currentSongs = cache.readQuery({query: GET_CURRENT_SONGS});
+                const currentSongIndex = currentSongs.indexOf(music => music.id === currentSong.id);
+                let newCurrentSong = currentSongs[currentSongIndex - 1];
+                if (!newCurrentSong) {
+                    newCurrentSong = currentSongs[currentSongs.length - 1]
+                }
+                client.writeQuery({
+                    query: GET_CURRENT_SONG,
+                    data: {currentSong: newCurrentSong}
+                });
+                return null
             },
         },
     }
@@ -42,6 +70,7 @@ cache.writeData({
     data: {
         token: null,
         currentSongs: [],
+        currentSong: null,
         playStatus: false
     }
 });
@@ -49,7 +78,7 @@ cache.writeData({
 export const updateHeaders = () => client.link = {
     ...client.link,
     headers: {
-        authorization: client.cache.readQuery({ query: GET_TOKEN })
+        authorization: client.cache.readQuery({query: GET_TOKEN})
     }
 };
 

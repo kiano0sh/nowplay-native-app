@@ -5624,6 +5624,11 @@ react-native-gesture-handler@^1.1.0:
   version "0.23.0"
   resolved "https://github.com/react-native-community/react-native-maps/archive/v0.24-rc1.tar.gz#b032268667c006d51b382494d7ef6e6917250c29"
 
+react-native-music-control@^0.9.9:
+  version "0.9.9"
+  resolved "https://registry.yarnpkg.com/react-native-music-control/-/react-native-music-control-0.9.9.tgz#34a9613cd9589ef9d8de8c911713836ebc8c0a18"
+  integrity sha512-cJIg/TWjSnKXlvphFkDR6aoyDDdThlomwewimsys0t6gh0FzwA0FBHewrT745RdZt5BF+meCXNheeaNeO+liVw==
+
 react-native-ratings@^6.3.0:
   version "6.3.1"
   resolved "https://registry.yarnpkg.com/react-native-ratings/-/react-native-ratings-6.3.1.tgz#4e4bd87f376423dc62c933f570fc1932c78adaa4"
