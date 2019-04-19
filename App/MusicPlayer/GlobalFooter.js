@@ -7,7 +7,9 @@ import {
     GET_CURRENT_SONGS,
     GET_CURRENT_SONG,
     PAUSE_CURRENT_SONG,
-    PLAY_CURRENT_SONG
+    PLAY_CURRENT_SONG,
+    PLAY_NEXT_SONG,
+    PLAY_PREVIOUS_SONG
 } from "../Queries/CacheQueries";
 import { graphql, compose} from 'react-apollo';
 import {client} from "../ApolloClient";
@@ -28,12 +30,20 @@ class GlobalFooter extends React.Component {
     //     }
     // }
 
-    _playMusic() {
+    _playSong() {
         this.props.client.mutate({mutation: PLAY_CURRENT_SONG})
     }
 
-    _pauseMusic() {
+    _pauseSong() {
         this.props.client.mutate({mutation: PAUSE_CURRENT_SONG})
+    }
+
+    _playNextSong() {
+        this.props.client.mutate({mutation: PLAY_NEXT_SONG})
+    }
+
+    _playPreviousSong() {
+        this.props.client.mutate({mutation: PLAY_PREVIOUS_SONG})
     }
 
     render() {
@@ -42,7 +52,12 @@ class GlobalFooter extends React.Component {
         return (
             <View style={styles.container}>
                 <View style={styles.buttonContainer}>
-                    <Icon type={'foundation'} name={'previous'} size={30}  color={'white'} />
+                    <Icon type={'foundation'}
+                          name={'previous'}
+                          size={30}
+                          color={'white'}
+                          onPress={() => this._playPreviousSong()}
+                    />
                     {
                         playStatusQuery.playStatus ?
                             (
@@ -51,7 +66,7 @@ class GlobalFooter extends React.Component {
                                       size={35}
                                       containerStyle={styles.playButtonStyle}
                                       color={'white'}
-                                      onPress={() => this._pauseMusic()}
+                                      onPress={() => this._pauseSong()}
                                 />
                             )
                             :
@@ -61,11 +76,18 @@ class GlobalFooter extends React.Component {
                                       size={35}
                                       containerStyle={styles.playButtonStyle}
                                       color={'white'}
-                                      onPress={() => this._playMusic()}
+                                      onPress={() => this._playSong()}
                                 />
                             )
                     }
-                    <Icon type={'foundation'} name={'next'} size={30} containerStyle={styles.nextButtonStyle} color={'white'}/>
+                    <Icon type={'foundation'}
+                          name={'next'}
+                          size={30}
+                          containerStyle={styles.nextButtonStyle}
+                          color={'white'}
+                          onPress={() => this._playNextSong()}
+
+                    />
                 </View>
                 <View style={styles.titleContainer}>
                     <Text style={styles.titleStyles}

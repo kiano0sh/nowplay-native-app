@@ -6,11 +6,15 @@ import {
     Button,
 } from 'react-native';
 import {SearchBar, ListItem, Text, Image} from "react-native-elements";
-import {Mutation} from "react-apollo";
-import {soundcloudSearch, streamUrl} from "../../API/Soundcloud/soundcloudHelper";
+import {soundcloudSearch} from "../../API/Soundcloud/soundcloudHelper";
 import {client} from "../../ApolloClient";
-import {GET_CURRENT_SONGS, GET_CURRENT_SONG, GET_PLAY_STATUS, PLAY_CURRENT_SONG} from '../../Queries/CacheQueries'
-import { withApollo } from 'react-apollo';
+import {
+    GET_CURRENT_SONGS,
+    GET_PLAY_STATUS,
+    PLAY_CURRENT_SONG,
+    UPDATE_CURRENT_STACK
+} from '../../Queries/CacheQueries'
+import {withApollo} from 'react-apollo';
 
 
 class MusicMark extends React.Component {
@@ -103,56 +107,17 @@ class MusicMark extends React.Component {
         />
     );
 
-    // handling musics stack
+    // handling songs stack
     _updateStack = (music) => {
-        let currentSongsQuery = client.cache.readQuery({query: GET_CURRENT_SONGS});
 
-        let {currentSongs} = currentSongsQuery;
-
-        let currentSongsShadow = Object.assign([], currentSongs);
-
-
-        if(currentSongsShadow.length >= 31) {
-            currentSongsShadow.shift()
-        }
-
-        let wantedSong = false;
-        if (currentSongsShadow.length) {
-            wantedSong = currentSongsShadow.find(song => song.id === music.id);
-        }
-        if (!!wantedSong) {
-            let tempSongList = currentSongsShadow.filter(song => song.id !== music.id);
-            tempSongList.push(wantedSong);
-            currentSongsShadow = tempSongList
-        } else {
-            currentSongsShadow.push({
-                __typename: 'Music',
-                id: music.id,
-                streamUrl: streamUrl(music.uri),
-                title: music.title,
-                artwork_url: !!music.artwork_url ? music.artwork_url : music.user.avatar_url,
-                duration: music.duration,
-                username: music.user.username
-            });
-        }
-
-        client.writeQuery({
-            query: GET_CURRENT_SONGS,
-            data: {currentSongs: currentSongsShadow}
+        this.props.client.mutate({
+            mutation: UPDATE_CURRENT_STACK,
+            variables: {music}
         });
 
-        client.writeQuery({
-            query: GET_CURRENT_SONG,
-            data: {currentSong: currentSongsShadow[currentSongsShadow.length - 1]}
+        this.props.client.mutate({
+            mutation: PLAY_CURRENT_SONG
         });
-
-        console.log(this.props);
-        this.props.client.mutate({mutation: PLAY_CURRENT_SONG});
-
-        // client.writeQuery({
-        //     query: GET_PLAY_STATUS,
-        //     data: {playStatus: true}
-        // });
 
         console.log(client.cache.readQuery({query: GET_CURRENT_SONGS}), 'after')
         console.log(client.cache.readQuery({query: GET_PLAY_STATUS}), 'after')

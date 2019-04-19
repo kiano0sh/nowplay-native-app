@@ -43,6 +43,12 @@ export const GET_CURRENT_SONGS = gql`
 
 // MUTATIONS
 
+export const UPDATE_CURRENT_STACK = gql`
+    mutation updateCurrentStack($music: Object!) {
+        updateCurrentStack(music: $music) @client
+    }
+`;
+
 export const PLAY_CURRENT_SONG = gql`
     mutation playCurrentSong {
         playCurrentSong @client
@@ -52,5 +58,17 @@ export const PLAY_CURRENT_SONG = gql`
 export const PAUSE_CURRENT_SONG = gql`
     mutation pauseCurrentSong {
         pauseCurrentSong @client
+    }
+`;
+
+export const PLAY_NEXT_SONG = gql`
+    mutation playNextSong {
+        playNextSong @client
+    }
+`;
+
+export const PLAY_PREVIOUS_SONG = gql`
+    mutation playPreviousSong {
+        playPreviousSong @client
     }
 `;
