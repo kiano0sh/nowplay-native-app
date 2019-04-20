@@ -1,4 +1,12 @@
-import {GET_CURRENT_SONG, GET_CURRENT_SONGS, GET_PLAY_STATUS} from "../Queries/CacheQueries";
+import {
+    GET_CURRENT_SONG,
+    GET_CURRENT_SONGS,
+    GET_PLAY_STATUS,
+    PLAY_CURRENT_SONG,
+    PAUSE_CURRENT_SONG,
+    PLAY_NEXT_SONG,
+    PLAY_PREVIOUS_SONG
+} from "../Queries/CacheQueries";
 import {streamUrl} from "../API/Soundcloud/soundcloudHelper";
 import MusicControl from 'react-native-music-control';
 
@@ -33,7 +41,7 @@ const musicPlayerResolvers = {
                 username: music.user.username,
                 genre: music.genre,
                 description: music.description,
-                date: music.created_at
+                created_at: music.created_at
             });
         }
 
@@ -49,7 +57,36 @@ const musicPlayerResolvers = {
     },
     playCurrentSong: (root, args, {cache, client}) => {
 
+        const {currentSong} = cache.readQuery({query: GET_CURRENT_SONG});
 
+        // set up OS music controls
+        MusicControl.enableControl('seekForward', false);
+        MusicControl.enableControl('seekBackward', false);
+        MusicControl.enableControl('skipForward', false);
+        MusicControl.enableControl('skipBackward', false);
+        MusicControl.enableBackgroundMode(true);
+
+        // listen to control callbacks
+        MusicControl.on('play', () => this.props.client.mutate({mutation: PLAY_CURRENT_SONG}));
+        MusicControl.on('pause', () => this.props.client.mutate({mutation: PAUSE_CURRENT_SONG}));
+        MusicControl.on('nextTrack', () => this.props.client.mutate({mutation: PLAY_NEXT_SONG}));
+        MusicControl.on('previousTrack', () =>this.props.client.mutate({mutation: PLAY_PREVIOUS_SONG}));
+
+        // update what's playing
+        MusicControl.setNowPlaying({
+            title: currentSong.title || "",
+            artwork: currentSong.artwork_url || "",
+            artist: currentSong.username || "",
+            genre: currentSong.genre || "",
+            duration: currentSong.duration/1000,
+            description: currentSong.description || "",
+            color: 0xFFFFFFF,
+            date: currentSong.created_at
+        });
+
+        MusicControl.updatePlayback({
+            state: MusicControl.STATE_PLAYING
+        });
 
         client.writeQuery({
             query: GET_PLAY_STATUS,
