@@ -16,9 +16,12 @@ import GlobalFooter from './MusicPlayer/GlobalFooter'
 
 
 class App extends React.Component {
-    state = {
-        isFooter: false
-    };
+    constructor(props, context) {
+        super(props)
+        this.state = {
+            isFooter: false
+        };
+    }
 
     handleNavigationChange = (prev, next, action) => {
         if (next.index === 1) {
@@ -34,9 +37,10 @@ class App extends React.Component {
             <ApolloProvider client={client}>
                 <ThemeProvider>
                     <Navigations ref={nav => {this.navigation = nav}}
-                                 onNavigationStateChange={this.handleNavigationChange}
+                                 onNavigationStateChange={(prev, next, action) => this.handleNavigationChange(prev, next, action)}
                     />
-                    {/*{isFooter && <GlobalFooter navigation={this.navigation}/>}*/}
+                    {console.log(isFooter)}
+                    {isFooter ? <GlobalFooter navigation={this.navigation}/> : null}
                 </ThemeProvider>
             </ApolloProvider>
         )

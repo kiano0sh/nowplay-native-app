@@ -66,11 +66,17 @@ const musicPlayerResolvers = {
         MusicControl.enableControl('skipBackward', false);
         MusicControl.enableBackgroundMode(true);
 
+        MusicControl.enableControl('play', true)
+        MusicControl.enableControl('pause', true)
+        MusicControl.enableControl('stop', false)
+        MusicControl.enableControl('nextTrack', true)
+        MusicControl.enableControl('previousTrack', true)
+
         // listen to control callbacks
-        MusicControl.on('play', () => this.props.client.mutate({mutation: PLAY_CURRENT_SONG}));
-        MusicControl.on('pause', () => this.props.client.mutate({mutation: PAUSE_CURRENT_SONG}));
-        MusicControl.on('nextTrack', () => this.props.client.mutate({mutation: PLAY_NEXT_SONG}));
-        MusicControl.on('previousTrack', () =>this.props.client.mutate({mutation: PLAY_PREVIOUS_SONG}));
+        MusicControl.on('play', () => client.mutate({mutation: PLAY_CURRENT_SONG}));
+        MusicControl.on('pause', () => client.mutate({mutation: PAUSE_CURRENT_SONG}));
+        MusicControl.on('nextTrack', () => client.mutate({mutation: PLAY_NEXT_SONG}));
+        MusicControl.on('previousTrack', () => client.mutate({mutation: PLAY_PREVIOUS_SONG}));
 
         // update what's playing
         MusicControl.setNowPlaying({
@@ -95,10 +101,16 @@ const musicPlayerResolvers = {
         return null
     },
     pauseCurrentSong: (root, args, {cache, client}) => {
+
         client.writeQuery({
             query: GET_PLAY_STATUS,
             data: {playStatus: false}
         });
+
+        MusicControl.updatePlayback({
+            state: MusicControl.STATE_PAUSED
+        });
+
         return null
     },
     playNextSong: (root, args, {cache, client}) => {
@@ -109,10 +121,16 @@ const musicPlayerResolvers = {
         if (!newCurrentSong) {
             newCurrentSong = currentSongs[0]
         }
+
         client.writeQuery({
             query: GET_CURRENT_SONG,
             data: {currentSong: newCurrentSong}
         });
+
+        client.mutate({
+            mutation: PLAY_CURRENT_SONG
+        });
+
         return null
     },
     playPreviousSong: (root, args, {cache, client}) => {
@@ -123,9 +141,14 @@ const musicPlayerResolvers = {
         if (!newCurrentSong) {
             newCurrentSong = currentSongs[currentSongs.length - 1]
         }
+
         client.writeQuery({
             query: GET_CURRENT_SONG,
             data: {currentSong: newCurrentSong}
+        });
+
+        client.mutate({
+            mutation: PLAY_CURRENT_SONG
         });
         return null
     },
