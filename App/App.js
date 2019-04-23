@@ -36,7 +36,7 @@ class App extends React.Component {
                     <Navigations ref={nav => {this.navigation = nav}}
                                  onNavigationStateChange={this.handleNavigationChange}
                     />
-                    {isFooter && <GlobalFooter navigation={this.navigation}/>}
+                    {/*{isFooter && <GlobalFooter navigation={this.navigation}/>}*/}
                 </ThemeProvider>
             </ApolloProvider>
         )
