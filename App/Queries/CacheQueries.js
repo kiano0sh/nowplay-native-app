@@ -14,6 +14,12 @@ export const GET_PLAY_STATUS = gql`
     }
 `;
 
+export const GET_CURRENT_TIME = gql`
+    {
+        currentTime @client
+    }
+`;
+
 export const GET_CURRENT_SONG = gql`
     {
         currentSong @client {

@@ -6,11 +6,10 @@
  * @flow
  */
 
-import React, {Component} from 'react';
+import React from 'react';
 import {ApolloProvider} from "react-apollo";
-import {client, waitOnCache} from "./ApolloClient";
-import {ThemeProvider, Text} from 'react-native-elements';
-import {View, ScrollView} from 'react-native';
+import {client} from "./ApolloClient";
+import {ThemeProvider} from 'react-native-elements';
 import Navigations from './Navigations'
 import GlobalFooter from './MusicPlayer/GlobalFooter'
 
@@ -23,8 +22,8 @@ class App extends React.Component {
         };
     }
 
-    handleNavigationChange = (prev, next, action) => {
-        if (next.index === 1) {
+    handleNavigationChange = (prevState, newState, action) => {
+        if (newState.index === 1) {
             this.setState({isFooter: true})
         } else {
             this.setState({isFooter: false})
@@ -37,7 +36,7 @@ class App extends React.Component {
             <ApolloProvider client={client}>
                 <ThemeProvider>
                     <Navigations ref={nav => {this.navigation = nav}}
-                                 onNavigationStateChange={(prev, next, action) => this.handleNavigationChange(prev, next, action)}
+                                 onNavigationStateChange={this.handleNavigationChange}
                     />
                     {console.log(isFooter)}
                     {isFooter ? <GlobalFooter navigation={this.navigation}/> : null}

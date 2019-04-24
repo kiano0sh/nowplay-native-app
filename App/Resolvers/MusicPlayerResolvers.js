@@ -9,6 +9,7 @@ import {
 } from "../Queries/CacheQueries";
 import {streamUrl} from "../API/Soundcloud/soundcloudHelper";
 import MusicControl from 'react-native-music-control';
+import Video from 'react-native-video'
 
 const musicPlayerResolvers = {
     updateCurrentStack: (root, args, {cache, client}) => {
@@ -58,6 +59,7 @@ const musicPlayerResolvers = {
     playCurrentSong: (root, args, {cache, client}) => {
 
         const {currentSong} = cache.readQuery({query: GET_CURRENT_SONG});
+        console.log(currentSong.streamUrl);
 
         // set up OS music controls
         MusicControl.enableControl('seekForward', false);
@@ -66,11 +68,11 @@ const musicPlayerResolvers = {
         MusicControl.enableControl('skipBackward', false);
         MusicControl.enableBackgroundMode(true);
 
-        MusicControl.enableControl('play', true)
-        MusicControl.enableControl('pause', true)
-        MusicControl.enableControl('stop', false)
-        MusicControl.enableControl('nextTrack', true)
-        MusicControl.enableControl('previousTrack', true)
+        MusicControl.enableControl('play', true);
+        MusicControl.enableControl('pause', true);
+        MusicControl.enableControl('stop', false);
+        MusicControl.enableControl('nextTrack', true);
+        MusicControl.enableControl('previousTrack', true);
 
         // listen to control callbacks
         MusicControl.on('play', () => client.mutate({mutation: PLAY_CURRENT_SONG}));
@@ -94,9 +96,12 @@ const musicPlayerResolvers = {
             state: MusicControl.STATE_PLAYING
         });
 
+
         client.writeQuery({
             query: GET_PLAY_STATUS,
-            data: {playStatus: true}
+            data: {
+                playStatus: true
+            }
         });
         return null
     },

@@ -31,7 +31,8 @@ cache.writeData({
         token: null,
         currentSongs: [],
         currentSong: null,
-        playStatus: false
+        playStatus: false,
+        currentTime: null
     }
 });
 

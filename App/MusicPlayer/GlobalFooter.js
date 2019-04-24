@@ -1,7 +1,6 @@
 import React from 'react'
 import {StyleSheet, View} from 'react-native'
-import {Text, Card, Icon} from 'react-native-elements'
-import {Query} from "react-apollo";
+import {Text, Icon} from 'react-native-elements'
 import {
     GET_PLAY_STATUS,
     GET_CURRENT_SONGS,
@@ -9,26 +8,16 @@ import {
     PAUSE_CURRENT_SONG,
     PLAY_CURRENT_SONG,
     PLAY_NEXT_SONG,
-    PLAY_PREVIOUS_SONG
+    PLAY_PREVIOUS_SONG,
+    GET_CURRENT_TIME
 } from "../Queries/CacheQueries";
 import { graphql, compose} from 'react-apollo';
-import {client} from "../ApolloClient";
 import { withApollo } from 'react-apollo';
+import Video from "react-native-video";
 
 
 
 class GlobalFooter extends React.Component {
-    // constructor(props, context) {
-    //     super(props);
-    //     this.state = {
-    //     }
-    // }
-
-    // componentDidUpdate(prevProps: Readonly<P>, prevState: Readonly<S>, snapshot: SS): void {
-    //     if (prevProps.currentSongsQuery !== this.props.currentSongsQuery) {
-    //         console.log(this.props)
-    //     }
-    // }
 
     _playSong() {
         this.props.client.mutate({mutation: PLAY_CURRENT_SONG})
@@ -46,9 +35,19 @@ class GlobalFooter extends React.Component {
         this.props.client.mutate({mutation: PLAY_PREVIOUS_SONG})
     }
 
+    _setCurrentTime = ({currentTime}) => {
+        this.props.client.writeQuery({
+            query: GET_CURRENT_TIME,
+            data: {currentTime}
+        })
+
+        console.log(this.props.client.readQuery({query: GET_CURRENT_TIME}))
+
+    };
+
     render() {
         console.log(this.props);
-        const {playStatusQuery, currentSongsQuery, currentSongQuery} = this.props;
+        const {playStatusQuery, currentSongQuery} = this.props;
         return (
             <View style={styles.container}>
                 <View style={styles.buttonContainer}>
@@ -61,13 +60,27 @@ class GlobalFooter extends React.Component {
                     {
                         playStatusQuery.playStatus ?
                             (
-                                <Icon type={'foundation'}
-                                      name={'pause'}
-                                      size={35}
-                                      containerStyle={styles.playButtonStyle}
-                                      color={'white'}
-                                      onPress={() => this._pauseSong()}
-                                />
+                                <View>
+                                    <Icon type={'foundation'}
+                                          name={'pause'}
+                                          size={35}
+                                          containerStyle={styles.playButtonStyle}
+                                          color={'white'}
+                                          onPress={() => this._pauseSong()}
+                                    />
+                                    <Video
+                                        source={{uri: currentSongQuery.currentSong.streamUrl }}
+                                        ref="audio"
+                                        volume={1.0}
+                                        muted={false}
+                                        playInBackground={true}
+                                        playWhenInactive={true}
+                                        onEnd={() => this._playNextSong()}
+                                        onProgress={this._setCurrentTime}
+                                        resizeMode="cover"
+                                        repeat={false}
+                                    />
+                                </View>
                             )
                             :
                             (
@@ -131,7 +144,7 @@ const styles = StyleSheet.create({
     titleStyles: {
         color: '#fff',
         fontSize: 16,
-        maxWidth: 270
+        maxWidth: '70%'
     },
     playButtonStyle: {
         marginRight: 20,
@@ -149,7 +162,3 @@ export default compose(
     graphql(GET_CURRENT_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongsQuery'}),
     graphql(GET_CURRENT_SONG, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongQuery'})
     )(GlobalFooter)
-
-// {/*<View style={{backgroundColor: 'blue'}}>*/}
-// {/*    <Text style={{color: 'white'}}>Music player here ;)</Text>*/}
-// {/*</View>*/}
