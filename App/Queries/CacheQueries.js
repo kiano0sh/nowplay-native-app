@@ -67,6 +67,12 @@ export const PAUSE_CURRENT_SONG = gql`
     }
 `;
 
+export const SET_CURRENT_TIME = gql`
+    mutation setCurrentTime($currentTime: Int!) {
+        setCurrentTime(currentTime: $currentTime) @client
+    }
+`;
+
 export const PLAY_NEXT_SONG = gql`
     mutation playNextSong {
         playNextSong @client

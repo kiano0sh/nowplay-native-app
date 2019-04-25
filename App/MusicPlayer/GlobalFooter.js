@@ -9,6 +9,7 @@ import {
     PLAY_CURRENT_SONG,
     PLAY_NEXT_SONG,
     PLAY_PREVIOUS_SONG,
+    SET_CURRENT_TIME,
     GET_CURRENT_TIME
 } from "../Queries/CacheQueries";
 import { graphql, compose} from 'react-apollo';
@@ -36,14 +37,19 @@ class GlobalFooter extends React.Component {
     }
 
     _setCurrentTime = ({currentTime}) => {
-        this.props.client.writeQuery({
-            query: GET_CURRENT_TIME,
-            data: {currentTime}
-        })
 
-        console.log(this.props.client.readQuery({query: GET_CURRENT_TIME}))
+        this.props.client.mutate({mutation: SET_CURRENT_TIME, variables: {currentTime}});
+
+        // console.log(this.props.client.readQuery({query: GET_CURRENT_TIME}))
 
     };
+
+    shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean {
+        const {playStatusQuery, currentSongQuery} = this.props;
+        const playStatus = playStatusQuery.playStatus !== nextProps.playStatusQuery.playStatus;
+        const currentSong = currentSongQuery.currentSong !== nextProps.currentSongQuery.currentSong;
+        return playStatus || currentSong
+    }
 
     render() {
         console.log(this.props);
@@ -60,27 +66,13 @@ class GlobalFooter extends React.Component {
                     {
                         playStatusQuery.playStatus ?
                             (
-                                <View>
-                                    <Icon type={'foundation'}
-                                          name={'pause'}
-                                          size={35}
-                                          containerStyle={styles.playButtonStyle}
-                                          color={'white'}
-                                          onPress={() => this._pauseSong()}
-                                    />
-                                    <Video
-                                        source={{uri: currentSongQuery.currentSong.streamUrl }}
-                                        ref="audio"
-                                        volume={1.0}
-                                        muted={false}
-                                        playInBackground={true}
-                                        playWhenInactive={true}
-                                        onEnd={() => this._playNextSong()}
-                                        onProgress={this._setCurrentTime}
-                                        resizeMode="cover"
-                                        repeat={false}
-                                    />
-                                </View>
+                                <Icon type={'foundation'}
+                                      name={'pause'}
+                                      size={35}
+                                      containerStyle={styles.playButtonStyle}
+                                      color={'white'}
+                                      onPress={() => this._pauseSong()}
+                                />
                             )
                             :
                             (
@@ -92,6 +84,25 @@ class GlobalFooter extends React.Component {
                                       onPress={() => this._playSong()}
                                 />
                             )
+                    }
+
+                    {currentSongQuery.currentSong ?
+                        <Video
+                            source={{uri: currentSongQuery.currentSong.streamUrl}}
+                            audioOnly={true}
+                            ref="audio"
+                            volume={1.0}
+                            muted={false}
+                            paused={!playStatusQuery.playStatus}
+                            playInBackground={true}
+                            playWhenInactive={true}
+                            onEnd={() => this._playNextSong()}
+                            onProgress={this._setCurrentTime}
+                            resizeMode="cover"
+                            repeat={false}
+                        />
+                        :
+                        null
                     }
                     <Icon type={'foundation'}
                           name={'next'}

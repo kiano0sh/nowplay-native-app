@@ -5,11 +5,14 @@ import {
     PLAY_CURRENT_SONG,
     PAUSE_CURRENT_SONG,
     PLAY_NEXT_SONG,
-    PLAY_PREVIOUS_SONG
+    PLAY_PREVIOUS_SONG,
+    GET_CURRENT_TIME,
+    GET_CURRENT_SONG_REF
 } from "../Queries/CacheQueries";
 import {streamUrl} from "../API/Soundcloud/soundcloudHelper";
 import MusicControl from 'react-native-music-control';
 import Video from 'react-native-video'
+import React from "react";
 
 const musicPlayerResolvers = {
     updateCurrentStack: (root, args, {cache, client}) => {
@@ -61,12 +64,18 @@ const musicPlayerResolvers = {
         const {currentSong} = cache.readQuery({query: GET_CURRENT_SONG});
         console.log(currentSong.streamUrl);
 
-        // set up OS music controls
-        MusicControl.enableControl('seekForward', false);
-        MusicControl.enableControl('seekBackward', false);
-        MusicControl.enableControl('skipForward', false);
-        MusicControl.enableControl('skipBackward', false);
-        MusicControl.enableBackgroundMode(true);
+        // Seeking
+        MusicControl.enableControl("seekForward", false); // iOS only
+        MusicControl.enableControl("seekBackward", false); // iOS only
+        MusicControl.enableControl("seek", true); // Android only
+        MusicControl.enableControl("skipForward", false);
+        MusicControl.enableControl("skipBackward", false);
+
+        // Android Specific Options
+        MusicControl.enableControl("setRating", false);
+        MusicControl.enableControl("volume", true); // Only affected when remoteVolume is enabled
+        MusicControl.enableControl("remoteVolume", false);
+        MusicControl.enableControl("closeNotification", true, { when: "paused" });
 
         MusicControl.enableControl('play', true);
         MusicControl.enableControl('pause', true);
@@ -111,9 +120,25 @@ const musicPlayerResolvers = {
             query: GET_PLAY_STATUS,
             data: {playStatus: false}
         });
-
         MusicControl.updatePlayback({
             state: MusicControl.STATE_PAUSED
+        });
+
+        return null
+    },
+    setCurrentTime: (root, args, {client}) => {
+
+        let {currentTime} = args;
+        // console.log(currentTime, 'in cache')
+
+        client.writeQuery({
+            query: GET_CURRENT_TIME,
+            data: {currentTime}
+        });
+
+        MusicControl.updatePlayback({
+            state: MusicControl.STATE_PLAYING,
+            elapsedTime: currentTime
         });
 
         return null

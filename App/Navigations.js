@@ -3,11 +3,8 @@ import { createStackNavigator, createSwitchNavigator, createAppContainer } from 
 import {client} from './ApolloClient'
 import {GET_TOKEN} from "./Queries/CacheQueries";
 import Login from './Components/Authentication/Login'
-import Register from './Components/Authentication/Register'
-import Dashboard from './Components/Dashboard/Dashboard'
 import GoogleMapScreen from './Components/GoogleMap/GoogleMapScreen'
 import ChooseMusic from './Components/MusicMark/ChooseMusic'
-import OpenStreetMapScreen from './Components/OpenstreetMap/OpenStreetMapScreen'
 import {ActivityIndicator, StatusBar, View, StyleSheet} from 'react-native';
 import {waitOnCache} from "./ApolloClient";
 

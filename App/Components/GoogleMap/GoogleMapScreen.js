@@ -24,12 +24,7 @@ const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 class GoogleMapScreen extends React.Component {
     static navigationOptions = {
-        drawerLabel: 'Google Maps',
-        // drawerIcon: ({tintColor}) => (
-        //         //     <Image
-        //         //         source={require('../image/icons8-google-maps-48.png')}
-        //         //     />
-        //         // ),
+        header: null
     };
 
     constructor(props) {
