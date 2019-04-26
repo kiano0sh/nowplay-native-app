@@ -14,7 +14,7 @@ export const waitOnCache = persistCache({
 
 export const client = new ApolloClient({
     link: new HttpLink({
-        uri: 'http://192.168.1.34:4000',
+        uri: 'http://192.168.1.33:4000',
         // uri: 'http://5.9.213.173:4000/',
     }),
     cache,
@@ -30,9 +30,11 @@ cache.writeData({
     data: {
         token: null,
         currentSongs: [],
+        selectedSongs: [],
         currentSong: null,
         playStatus: false,
-        currentTime: null
+        currentTime: null,
+        currentSongRef: null
     }
 });
 

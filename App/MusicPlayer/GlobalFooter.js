@@ -10,7 +10,7 @@ import {
     PLAY_NEXT_SONG,
     PLAY_PREVIOUS_SONG,
     SET_CURRENT_TIME,
-    GET_CURRENT_TIME
+    GET_CURRENT_TIME, UPDATE_CURRENT_SONG_REF, GET_CURRENT_SONG_REF, GET_SELECTED_SONGS
 } from "../Queries/CacheQueries";
 import { graphql, compose} from 'react-apollo';
 import { withApollo } from 'react-apollo';
@@ -20,114 +20,129 @@ import Video from "react-native-video";
 
 class GlobalFooter extends React.Component {
 
-    _playSong() {
+    _playSong = () => {
         this.props.client.mutate({mutation: PLAY_CURRENT_SONG})
-    }
+    };
 
-    _pauseSong() {
+    _pauseSong = () => {
         this.props.client.mutate({mutation: PAUSE_CURRENT_SONG})
-    }
+    };
 
-    _playNextSong() {
+    _playNextSong = () => {
         this.props.client.mutate({mutation: PLAY_NEXT_SONG})
-    }
+    };
 
-    _playPreviousSong() {
+    _playPreviousSong = () => {
         this.props.client.mutate({mutation: PLAY_PREVIOUS_SONG})
     }
 
     _setCurrentTime = ({currentTime}) => {
-
         this.props.client.mutate({mutation: SET_CURRENT_TIME, variables: {currentTime}});
-
-        // console.log(this.props.client.readQuery({query: GET_CURRENT_TIME}))
-
     };
 
-    shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean {
-        const {playStatusQuery, currentSongQuery} = this.props;
-        const playStatus = playStatusQuery.playStatus !== nextProps.playStatusQuery.playStatus;
-        const currentSong = currentSongQuery.currentSong !== nextProps.currentSongQuery.currentSong;
-        return playStatus || currentSong
-    }
+    _updateCurrentSongRef = () => {
+        this.props.client.mutate({mutation: UPDATE_CURRENT_SONG_REF, variables: {currentSongRef: this.currentSongRef}});
+
+        // console.log(this.props.client.readQuery({query: GET_CURRENT_SONG_REF}))
+    };
+
+    // shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean {
+    //     const {playStatusQuery, currentSongQuery, selectedSongsQuery} = this.props;
+    //     const playStatus = playStatusQuery.playStatus !== nextProps.playStatusQuery.playStatus;
+    //     const currentSong = currentSongQuery.currentSong !== nextProps.currentSongQuery.currentSong;
+    //     const selectedSongs = selectedSongsQuery.selectedSongs !== nextProps.selectedSongsQuery.selectedSongs;
+    //     return playStatus || currentSong || selectedSongs
+    // }
 
     render() {
         console.log(this.props);
-        const {playStatusQuery, currentSongQuery} = this.props;
+        const {playStatusQuery, currentSongQuery, selectedSongsQuery} = this.props;
         return (
-            <View style={styles.container}>
-                <View style={styles.buttonContainer}>
-                    <Icon type={'foundation'}
-                          name={'previous'}
-                          size={30}
-                          color={'white'}
-                          onPress={() => this._playPreviousSong()}
-                    />
+            <View>
+                <View>
                     {
-                        playStatusQuery.playStatus ?
+                        selectedSongsQuery.selectedSongs ?
                             (
-                                <Icon type={'foundation'}
-                                      name={'pause'}
-                                      size={35}
-                                      containerStyle={styles.playButtonStyle}
-                                      color={'white'}
-                                      onPress={() => this._pauseSong()}
-                                />
+                                <Text>{selectedSongsQuery.selectedSongs.length}</Text>
                             )
                             :
-                            (
-                                <Icon type={'foundation'}
-                                      name={'play'}
-                                      size={35}
-                                      containerStyle={styles.playButtonStyle}
-                                      color={'white'}
-                                      onPress={() => this._playSong()}
-                                />
-                            )
+                            null
                     }
-
-                    {currentSongQuery.currentSong ?
-                        <Video
-                            source={{uri: currentSongQuery.currentSong.streamUrl}}
-                            audioOnly={true}
-                            ref="audio"
-                            volume={1.0}
-                            muted={false}
-                            paused={!playStatusQuery.playStatus}
-                            playInBackground={true}
-                            playWhenInactive={true}
-                            onEnd={() => this._playNextSong()}
-                            onProgress={this._setCurrentTime}
-                            resizeMode="cover"
-                            repeat={false}
-                        />
-                        :
-                        null
-                    }
-                    <Icon type={'foundation'}
-                          name={'next'}
-                          size={30}
-                          containerStyle={styles.nextButtonStyle}
-                          color={'white'}
-                          onPress={() => this._playNextSong()}
-
-                    />
                 </View>
-                <View style={styles.titleContainer}>
-                    <Text style={styles.titleStyles}
-                          numberOfLines={1}
-                    >
+                <View style={styles.container}>
+                    <View style={styles.buttonContainer}>
+                        <Icon type={'foundation'}
+                              name={'previous'}
+                              size={30}
+                              color={'white'}
+                              onPress={this._playPreviousSong}
+                        />
                         {
-                            currentSongQuery.currentSong ?
+                            playStatusQuery.playStatus ?
                                 (
-                                    currentSongQuery.currentSong.title
+                                    <Icon type={'foundation'}
+                                          name={'pause'}
+                                          size={35}
+                                          containerStyle={styles.playButtonStyle}
+                                          color={'white'}
+                                          onPress={this._pauseSong}
+                                    />
                                 )
                                 :
                                 (
-                                    'No Music Is Selected Yet!'
+                                    <Icon type={'foundation'}
+                                          name={'play'}
+                                          size={35}
+                                          containerStyle={styles.playButtonStyle}
+                                          color={'white'}
+                                          onPress={this._playSong}
+                                    />
                                 )
                         }
-                    </Text>
+
+                        {currentSongQuery.currentSong ?
+                            <Video
+                                source={{uri: currentSongQuery.currentSong.streamUrl}}
+                                ref={(ref: Video) => { this.currentSongRef = ref }}
+                                onLoad={this._updateCurrentSongRef}
+                                audioOnly={true}
+                                volume={1.0}
+                                muted={false}
+                                paused={!playStatusQuery.playStatus}
+                                playInBackground={true}
+                                playWhenInactive={true}
+                                onEnd={this._playNextSong}
+                                onProgress={this._setCurrentTime}
+                                resizeMode="cover"
+                                repeat={false}
+                            />
+                            :
+                            null
+                        }
+                        <Icon type={'foundation'}
+                              name={'next'}
+                              size={30}
+                              containerStyle={styles.nextButtonStyle}
+                              color={'white'}
+                              onPress={this._playNextSong}
+                        />
+                    </View>
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.titleStyles}
+                              numberOfLines={1}
+                        >
+                            {
+                                currentSongQuery.currentSong ?
+                                    (
+                                        currentSongQuery.currentSong.title
+                                    )
+                                    :
+                                    (
+                                        'No Music Is Selected Yet!'
+                                    )
+                            }
+                        </Text>
+                    </View>
                 </View>
             </View>
         )
@@ -171,5 +186,6 @@ export default compose(
     withApollo,
     graphql(GET_PLAY_STATUS, {options: { fetchPolicy: 'cache-only' }, name: 'playStatusQuery'}),
     graphql(GET_CURRENT_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongsQuery'}),
-    graphql(GET_CURRENT_SONG, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongQuery'})
+    graphql(GET_CURRENT_SONG, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongQuery'}),
+    graphql(GET_SELECTED_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'selectedSongsQuery'})
     )(GlobalFooter)

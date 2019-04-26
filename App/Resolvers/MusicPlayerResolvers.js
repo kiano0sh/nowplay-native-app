@@ -7,7 +7,8 @@ import {
     PLAY_NEXT_SONG,
     PLAY_PREVIOUS_SONG,
     GET_CURRENT_TIME,
-    GET_CURRENT_SONG_REF
+    GET_CURRENT_SONG_REF,
+    GET_SELECTED_SONGS
 } from "../Queries/CacheQueries";
 import {streamUrl} from "../API/Soundcloud/soundcloudHelper";
 import MusicControl from 'react-native-music-control';
@@ -58,6 +59,23 @@ const musicPlayerResolvers = {
             query: GET_CURRENT_SONG,
             data: {currentSong: currentSongsShadow[currentSongsShadow.length - 1]}
         });
+        return null
+    },
+    updateCurrentSongRef: (root, args, {cache, client}) => {
+        let {currentSongRef} = args;
+
+        // console.log(currentSongRef, 'resolved')
+        // console.log(cache)
+        //
+        // setTimeout(() => console.log(currentSongRef.props.muted = true, 'resolved'), 5000)
+        // console.log(currentSongRef)
+        //
+        // client.writeQuery({
+        //     query: GET_CURRENT_SONG_REF,
+        //     data: {
+        //         currentSongRef
+        //     }
+        // });
     },
     playCurrentSong: (root, args, {cache, client}) => {
 
@@ -182,6 +200,36 @@ const musicPlayerResolvers = {
         });
         return null
     },
+    updateSelectedSongs: (root, args, {cache, client}) => {
+        let {selectedSong} = args;
+        const {selectedSongs} = cache.readQuery({query: GET_SELECTED_SONGS});
+
+        console.log(selectedSongs)
+
+        let customItem = {
+            __typename: 'Music',
+            id: selectedSong.id + 1,
+            trackService: "Soundcloud",
+            title: selectedSong.title,
+            artwork_url: !!selectedSong.artwork_url ? selectedSong.artwork_url : selectedSong.user.avatar_url,
+            username: selectedSong.user.username,
+        };
+
+        let itemIndex = selectedSongs.findIndex(element => element.id === customItem.id);
+
+        if ( itemIndex === -1) {
+            selectedSongs.push(customItem)
+        } else {
+            selectedSongs.splice(itemIndex, 1)
+        }
+
+        client.writeQuery({
+            query: GET_SELECTED_SONGS,
+            data: {selectedSongs}
+        });
+
+        return null
+    }
 };
 
 export default musicPlayerResolvers

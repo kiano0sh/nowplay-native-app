@@ -5,16 +5,17 @@ import {
     FlatList,
     Button,
 } from 'react-native';
-import {SearchBar, ListItem, Text, Image} from "react-native-elements";
+import {SearchBar, ListItem, Text, Icon} from "react-native-elements";
 import {soundcloudSearch} from "../../API/Soundcloud/soundcloudHelper";
 import {client} from "../../ApolloClient";
 import {
+    GET_CURRENT_SONG,
     GET_CURRENT_SONGS,
-    GET_PLAY_STATUS,
+    GET_PLAY_STATUS, GET_SELECTED_SONGS,
     PLAY_CURRENT_SONG,
-    UPDATE_CURRENT_STACK
+    UPDATE_CURRENT_STACK, UPDATE_SELECTED_SONGS
 } from '../../Queries/CacheQueries'
-import {withApollo} from 'react-apollo';
+import {compose, graphql, withApollo} from 'react-apollo';
 
 
 class MusicMark extends React.Component {
@@ -27,7 +28,8 @@ class MusicMark extends React.Component {
             loading: false,
             // TODO after pressing clear button while data is fetching an amount of data remains in state!
             // clear: false,
-            page: 0
+            page: 0,
+            selectedSongs: []
         }
     }
 
@@ -44,6 +46,29 @@ class MusicMark extends React.Component {
 
     componentDidMount(): void {
         // console.log(soundcloud)
+    }
+
+    // add selected track to state
+    _selectSong(selectedSong){
+
+        this.props.client.mutate({
+            mutation: UPDATE_SELECTED_SONGS,
+            variables: {selectedSong}
+        })
+    }
+
+    // find out about existence of item in our selectedSong
+    _isItemSelected(id) {
+
+        const {selectedSongs} = this.props.selectedSongsQuery;
+
+        console.log(selectedSongs)
+
+        if (selectedSongs && selectedSongs.find(item => item.id === id + 1)) {
+            return '#00c853'
+        } else {
+            return 'white'
+        }
     }
 
     updateSearch = search => {
@@ -64,7 +89,7 @@ class MusicMark extends React.Component {
                     }
                 })
                 // .catch(error => this.setState({resultError: error.message, loading: false}))
-            })
+            }).catch(error => console.log(error))
         } else {
             this.setState((state, props) => {
                 return {
@@ -85,14 +110,21 @@ class MusicMark extends React.Component {
         <ListItem
             title={item.title}
             subtitle={
-                <View style={styles.subtitleView}>
-                    <Text style={styles.soundcloudText} numberOfLines={1}>From Soundcloud
-                        by {item.user.username}.</Text>
+                <View>
+                    <Text style={styles.soundcloudText}>
+                        From Soundcloud by {item.user.username}.
+                    </Text>
                 </View>
             }
             rightSubtitle={
                 <View style={styles.subtitleView}>
                     <Text style={styles.musicDuration}>{(item.duration / 60000).toFixed(2).replace('.', ':')}</Text>
+                    <Icon type={'font-awesome'}
+                          name={'check-circle'}
+                          size={30}
+                          color={this._isItemSelected(item.id)}
+                          onPress={() => this._selectSong(item)}
+                    />
                 </View>
             }
             titleStyle={{color: 'white', fontWeight: 'bold'}}
@@ -152,7 +184,7 @@ class MusicMark extends React.Component {
                 //         }
                 //     })
                 // }
-            })
+            }).catch( error => console.log(error))
         } else {
 
         }
@@ -216,8 +248,11 @@ class MusicMark extends React.Component {
     }
 }
 
-export default withApollo(MusicMark);
-
+// export default withApollo(MusicMark);
+export default compose(
+    withApollo,
+    graphql(GET_SELECTED_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'selectedSongsQuery'})
+)(MusicMark)
 
 const styles = StyleSheet.create({
     container: {
@@ -229,13 +264,15 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
     },
     subtitleView: {
-        // flexDirection: 'row',
-        // justifyContent: 'space-between'
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center'
     },
     soundcloudText: {
         color: 'white',
     },
     musicDuration: {
         color: 'white',
+        marginRight: 15
     }
 });

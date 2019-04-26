@@ -14,6 +14,12 @@ export const GET_PLAY_STATUS = gql`
     }
 `;
 
+export const GET_CURRENT_SONG_REF = gql`
+    {
+        currentSongRef @client
+    }
+`;
+
 export const GET_CURRENT_TIME = gql`
     {
         currentTime @client
@@ -47,11 +53,29 @@ export const GET_CURRENT_SONGS = gql`
     }
 `;
 
+export const GET_SELECTED_SONGS = gql`
+    {
+        selectedSongs @client {
+            id
+            trackService
+            title
+            artwork_url
+            username
+        }
+    }
+`;
+
 // MUTATIONS
 
 export const UPDATE_CURRENT_STACK = gql`
     mutation updateCurrentStack($music: Object!) {
         updateCurrentStack(music: $music) @client
+    }
+`;
+
+export const UPDATE_CURRENT_SONG_REF = gql`
+    mutation updateCurrentSongRef($currentSongRef: Object!) {
+        updateCurrentSongRef(currentSongRef: $currentSongRef) @client
     }
 `;
 
@@ -82,5 +106,11 @@ export const PLAY_NEXT_SONG = gql`
 export const PLAY_PREVIOUS_SONG = gql`
     mutation playPreviousSong {
         playPreviousSong @client
+    }
+`;
+
+export const UPDATE_SELECTED_SONGS = gql`
+    mutation updateSelectedSongs($selectedSong: Object!) {
+        updateSelectedSongs(selectedSong: $selectedSong) @client
     }
 `;
