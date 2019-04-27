@@ -45,9 +45,13 @@ class GlobalFooter extends React.Component {
 
     _updateCurrentSongRef = () => {
         this.props.client.mutate({mutation: UPDATE_CURRENT_SONG_REF, variables: {currentSongRef: this.currentSongRef}});
-
         // console.log(this.props.client.readQuery({query: GET_CURRENT_SONG_REF}))
     };
+
+    _addMusicsToMark() {
+        let {selectedSongs} = this.props.selectedSongsQuery;
+        console.log(selectedSongs)
+    }
 
     // shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean {
     //     const {playStatusQuery, currentSongQuery, selectedSongsQuery} = this.props;
@@ -61,15 +65,15 @@ class GlobalFooter extends React.Component {
         console.log(this.props);
         const {playStatusQuery, currentSongQuery, selectedSongsQuery} = this.props;
         return (
-            <View>
+            <View style={{marginBottom: -4}}>
                 {
                     selectedSongsQuery.selectedSongs.length ?
                         <View style={styles.addBoxContainer}>
                             <View style={styles.addBoxView}>
                                 <Text style={styles.addMusicText}>{selectedSongsQuery.selectedSongs.length} music is selected.</Text>
                                 <View style={styles.addMusicButtonView}>
-                                    <Text style={styles.addMusicButton}>Add</Text>
-                                    <Icon type={'font-awesome'} name={'plus-circle'}/>
+                                    <Text style={styles.addMusicButton} onPress={() => this._addMusicsToMark()}>Add</Text>
+                                    <Icon type={'font-awesome'} name={'plus-circle'} onPress={() => this._addMusicsToMark()}/>
                                 </View>
                             </View>
                         </View>

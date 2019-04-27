@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 import {client} from './ApolloClient'
-import {GET_TOKEN} from "./Queries/CacheQueries";
+import {CLEAR_SELECTED_SONGS, GET_TOKEN} from "./Queries/CacheQueries";
 import Login from './Components/Authentication/Login'
 import GoogleMapScreen from './Components/GoogleMap/GoogleMapScreen'
 import ChooseMusic from './Components/MusicMark/ChooseMusic'
@@ -17,6 +17,8 @@ class AuthLoadingScreen extends React.Component {
     // Fetch the token from storage then navigate to our appropriate place
     _bootstrapAsync = async () => {
         const userToken = await client.cache.readQuery({ query: GET_TOKEN });
+        // clear selected songs in case it remains in the cache
+        client.mutate({mutation: CLEAR_SELECTED_SONGS})
         console.log(userToken);
         // This will switch to the App screen or Auth screen and this loading
         // screen will be unmounted and thrown away.

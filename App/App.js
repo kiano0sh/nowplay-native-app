@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import {ApolloProvider} from "react-apollo";
+import {ApolloProvider, withApollo} from "react-apollo";
 import {client} from "./ApolloClient";
 import {ThemeProvider} from 'react-native-elements';
 import Navigations from './Navigations'
@@ -21,6 +21,11 @@ class App extends React.Component {
             isFooter: false
         };
     }
+
+    // componentDidMount(): void {
+    //     console.log(this.props)
+    //     client.mutate({mutation: CLEAR_SELECTED_SONGS})
+    // }
 
     handleNavigationChange = (prevState, newState, action) => {
         if (newState.index === 1) {

@@ -93,6 +93,7 @@ class ChooseMusic extends React.Component {
             }).catch(error => console.log(error))
         } else {
             this.setState((state, props) => {
+                this.props.client.mutate({mutation: CLEAR_SELECTED_SONGS});
                 return {
                     search,
                     results: null,
@@ -205,6 +206,7 @@ class ChooseMusic extends React.Component {
                     clearIcon={!!search}
                     onClear={
                         () => this.setState((state, props) => {
+                            this.props.client.mutate({mutation: CLEAR_SELECTED_SONGS});
                             return {
                                 results: null,
                                 collection: [],
