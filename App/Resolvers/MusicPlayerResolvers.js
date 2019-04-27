@@ -8,11 +8,10 @@ import {
     PLAY_PREVIOUS_SONG,
     GET_CURRENT_TIME,
     GET_CURRENT_SONG_REF,
-    GET_SELECTED_SONGS
+    GET_SELECTED_SONGS,
 } from "../Queries/CacheQueries";
 import {streamUrl} from "../API/Soundcloud/soundcloudHelper";
 import MusicControl from 'react-native-music-control';
-import Video from 'react-native-video'
 import React from "react";
 
 const musicPlayerResolvers = {
@@ -204,28 +203,36 @@ const musicPlayerResolvers = {
         let {selectedSong} = args;
         const {selectedSongs} = cache.readQuery({query: GET_SELECTED_SONGS});
 
-        console.log(selectedSongs)
+        let selectedSongsShadow = Object.assign([], selectedSongs);
 
         let customItem = {
-            __typename: 'Music',
-            id: selectedSong.id + 1,
+            __typename: 'SelectedMusic',
+            id: selectedSong.id,
             trackService: "Soundcloud",
             title: selectedSong.title,
             artwork_url: !!selectedSong.artwork_url ? selectedSong.artwork_url : selectedSong.user.avatar_url,
             username: selectedSong.user.username,
         };
 
-        let itemIndex = selectedSongs.findIndex(element => element.id === customItem.id);
+        let itemIndex = selectedSongsShadow.findIndex(element => element.id === customItem.id);
 
         if ( itemIndex === -1) {
-            selectedSongs.push(customItem)
+            selectedSongsShadow.push(customItem)
         } else {
-            selectedSongs.splice(itemIndex, 1)
+            selectedSongsShadow.splice(itemIndex, 1)
         }
 
         client.writeQuery({
             query: GET_SELECTED_SONGS,
-            data: {selectedSongs}
+            data: {selectedSongs: selectedSongsShadow}
+        });
+
+        return null
+    },
+    clearSelectedSongs: (root, args, {client}) => {
+        client.writeQuery({
+            query: GET_SELECTED_SONGS,
+            data: {selectedSongs: []}
         });
 
         return null

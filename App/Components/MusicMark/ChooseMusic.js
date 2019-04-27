@@ -7,18 +7,21 @@ import {
 } from 'react-native';
 import {SearchBar, ListItem, Text, Icon} from "react-native-elements";
 import {soundcloudSearch} from "../../API/Soundcloud/soundcloudHelper";
-import {client} from "../../ApolloClient";
 import {
+    CLEAR_SELECTED_SONGS,
     GET_CURRENT_SONG,
     GET_CURRENT_SONGS,
-    GET_PLAY_STATUS, GET_SELECTED_SONGS,
+    GET_PLAY_STATUS,
+    GET_SELECTED_SONGS,
     PLAY_CURRENT_SONG,
-    UPDATE_CURRENT_STACK, UPDATE_SELECTED_SONGS
+    UPDATE_CURRENT_STACK,
+    UPDATE_SELECTED_SONGS
 } from '../../Queries/CacheQueries'
-import {compose, graphql, withApollo} from 'react-apollo';
+import {compose, graphql} from 'react-apollo';
+import { withApollo } from 'react-apollo';
 
 
-class MusicMark extends React.Component {
+class ChooseMusic extends React.Component {
     constructor(props, context) {
         super(props);
         this.state = {
@@ -44,8 +47,8 @@ class MusicMark extends React.Component {
         },
     };
 
-    componentDidMount(): void {
-        // console.log(soundcloud)
+    componentWillUnmount(): void {
+        this.props.client.mutate({mutation: CLEAR_SELECTED_SONGS})
     }
 
     // add selected track to state
@@ -62,9 +65,7 @@ class MusicMark extends React.Component {
 
         const {selectedSongs} = this.props.selectedSongsQuery;
 
-        console.log(selectedSongs)
-
-        if (selectedSongs && selectedSongs.find(item => item.id === id + 1)) {
+        if (selectedSongs && selectedSongs.find(item => item.id === id)) {
             return '#00c853'
         } else {
             return 'white'
@@ -151,8 +152,8 @@ class MusicMark extends React.Component {
             mutation: PLAY_CURRENT_SONG
         });
 
-        console.log(client.cache.readQuery({query: GET_CURRENT_SONGS}), 'after')
-        console.log(client.cache.readQuery({query: GET_PLAY_STATUS}), 'after')
+        console.log(this.props.client.cache.readQuery({query: GET_CURRENT_SONGS}), 'after')
+        console.log(this.props.client.cache.readQuery({query: GET_PLAY_STATUS}), 'after')
 
     };
 
@@ -248,11 +249,11 @@ class MusicMark extends React.Component {
     }
 }
 
-// export default withApollo(MusicMark);
+// export default withApollo(ChooseMusic);
 export default compose(
     withApollo,
     graphql(GET_SELECTED_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'selectedSongsQuery'})
-)(MusicMark)
+)(ChooseMusic)
 
 const styles = StyleSheet.create({
     container: {

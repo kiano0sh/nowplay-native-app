@@ -79,6 +79,18 @@ export const UPDATE_CURRENT_SONG_REF = gql`
     }
 `;
 
+export const UPDATE_SELECTED_SONGS = gql`
+    mutation updateSelectedSongs($selectedSong: Object!) {
+        updateSelectedSongs(selectedSong: $selectedSong) @client
+    }
+`;
+
+export const CLEAR_SELECTED_SONGS = gql`
+    mutation clearSelectedSongs {
+        clearSelectedSongs @client
+    }
+`;
+
 export const PLAY_CURRENT_SONG = gql`
     mutation playCurrentSong {
         playCurrentSong @client
@@ -106,11 +118,5 @@ export const PLAY_NEXT_SONG = gql`
 export const PLAY_PREVIOUS_SONG = gql`
     mutation playPreviousSong {
         playPreviousSong @client
-    }
-`;
-
-export const UPDATE_SELECTED_SONGS = gql`
-    mutation updateSelectedSongs($selectedSong: Object!) {
-        updateSelectedSongs(selectedSong: $selectedSong) @client
     }
 `;

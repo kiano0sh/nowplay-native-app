@@ -10,7 +10,10 @@ import {
     PLAY_NEXT_SONG,
     PLAY_PREVIOUS_SONG,
     SET_CURRENT_TIME,
-    GET_CURRENT_TIME, UPDATE_CURRENT_SONG_REF, GET_CURRENT_SONG_REF, GET_SELECTED_SONGS
+    GET_CURRENT_TIME,
+    UPDATE_CURRENT_SONG_REF,
+    GET_CURRENT_SONG_REF,
+    GET_SELECTED_SONGS
 } from "../Queries/CacheQueries";
 import { graphql, compose} from 'react-apollo';
 import { withApollo } from 'react-apollo';
@@ -34,7 +37,7 @@ class GlobalFooter extends React.Component {
 
     _playPreviousSong = () => {
         this.props.client.mutate({mutation: PLAY_PREVIOUS_SONG})
-    }
+    };
 
     _setCurrentTime = ({currentTime}) => {
         this.props.client.mutate({mutation: SET_CURRENT_TIME, variables: {currentTime}});
@@ -59,17 +62,20 @@ class GlobalFooter extends React.Component {
         const {playStatusQuery, currentSongQuery, selectedSongsQuery} = this.props;
         return (
             <View>
-                <View>
-                    {
-                        selectedSongsQuery.selectedSongs ?
-                            (
-                                <Text>{selectedSongsQuery.selectedSongs.length}</Text>
-                            )
-                            :
-                            null
-                    }
-                </View>
-                <View style={styles.container}>
+                {
+                    selectedSongsQuery.selectedSongs.length ?
+                        <View style={styles.addBoxContainer}>
+                            <View style={styles.addBoxView}>
+                                <Text style={styles.addMusicText}>{selectedSongsQuery.selectedSongs.length} music is selected.</Text>
+                                <View style={styles.addMusicButtonView}>
+                                    <Text style={styles.addMusicButton}>Add</Text>
+                                    <Icon type={'font-awesome'} name={'plus-circle'}/>
+                                </View>
+                            </View>
+                        </View>
+                        : null
+                }
+                <View style={styles.playerContainer}>
                     <View style={styles.buttonContainer}>
                         <Icon type={'foundation'}
                               name={'previous'}
@@ -150,7 +156,31 @@ class GlobalFooter extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    container: {
+    addBoxContainer: {
+        paddingTop: 5,
+        paddingBottom: 5,
+        backgroundColor: '#00c853'
+    },
+    addBoxView: {
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    addMusicText:{
+        marginLeft: 10,
+        fontSize: 14,
+        color: 'black'
+    },
+    addMusicButtonView: {
+        flexDirection: 'row',
+        marginRight: 10,
+    },
+    addMusicButton: {
+        marginRight: 5,
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'black'
+    },
+    playerContainer: {
         paddingTop: 15,
         paddingBottom: 15,
         backgroundColor: '#393e42'
@@ -187,5 +217,5 @@ export default compose(
     graphql(GET_PLAY_STATUS, {options: { fetchPolicy: 'cache-only' }, name: 'playStatusQuery'}),
     graphql(GET_CURRENT_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongsQuery'}),
     graphql(GET_CURRENT_SONG, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongQuery'}),
-    graphql(GET_SELECTED_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'selectedSongsQuery'})
+    graphql(GET_SELECTED_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'selectedSongsQuery'}),
     )(GlobalFooter)
