@@ -53,7 +53,7 @@ class ChooseMusic extends React.Component {
 
     // add selected track to state
     _selectSong(selectedSong){
-
+        console.log(selectedSong)
         this.props.client.mutate({
             mutation: UPDATE_SELECTED_SONGS,
             variables: {selectedSong}

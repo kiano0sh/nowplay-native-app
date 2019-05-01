@@ -7,12 +7,14 @@ import {
     ScrollView,
     Image,
 } from 'react-native';
+import {UPDATE_WORKING_LOCATION} from "../../Queries/CacheQueries"
 import {Button} from "react-native-elements";
 import MapView from 'react-native-maps';
 import {Marker, Circle} from 'react-native-maps';
 import {PermissionsAndroid} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {UrlTile, Callout} from 'react-native-maps';
+import { withApollo } from 'react-apollo';
 
 const {width, height} = Dimensions.get('window');
 
@@ -134,7 +136,16 @@ class GoogleMapScreen extends React.Component {
                         <Marker
                             coordinate={currentLocation.coords}
                             // image={circleIcon.uri}
-                            onPress={() => this.props.navigation.navigate('ChooseMusic')}
+                            onPress={(e) => { console.log(e.nativeEvent)
+                                this.props.client.mutate({
+                                    mutation: UPDATE_WORKING_LOCATION,
+                                    variables: {workingLocation: {
+                                        longitude: e.nativeEvent.coordinate.longitude,
+                                        latitude: e.nativeEvent.coordinate.latitude
+                                    }}
+                                })
+                                this.props.navigation.navigate('ChooseMusic')
+                            }}
                             title={'You'}
                         >
                         </Marker>
@@ -162,7 +173,7 @@ class GoogleMapScreen extends React.Component {
         );
     }
 }// End of MyHomeScreen class
-export default GoogleMapScreen;
+export default withApollo(GoogleMapScreen)
 
 
 const styles = StyleSheet.create({

@@ -10,12 +10,12 @@ import {
     PLAY_NEXT_SONG,
     PLAY_PREVIOUS_SONG,
     SET_CURRENT_TIME,
-    GET_CURRENT_TIME,
     UPDATE_CURRENT_SONG_REF,
-    GET_CURRENT_SONG_REF,
-    GET_SELECTED_SONGS
-} from "../Queries/CacheQueries";
-import { graphql, compose} from 'react-apollo';
+    GET_SELECTED_SONGS,
+    GET_WORKING_LOCATION
+} from "../../Queries/CacheQueries";
+import {CREATE_MUSIC_MARK, DELETE_MUSIC_MARK} from "../../Queries/Mutation"
+import { graphql, compose, Mutation} from 'react-apollo';
 import { withApollo } from 'react-apollo';
 import Video from "react-native-video";
 
@@ -48,9 +48,51 @@ class GlobalFooter extends React.Component {
         // console.log(this.props.client.readQuery({query: GET_CURRENT_SONG_REF}))
     };
 
-    _addMusicsToMark() {
-        let {selectedSongs} = this.props.selectedSongsQuery;
-        console.log(selectedSongs)
+    _addMusicMark(createMusicMark, workingLocationQuery, selectedSongsQuery) {
+        // console.log(selectedSongsQuery.selectedSongs)
+        // console.log({
+        //     longitude: workingLocationQuery.workingLocation.longitude,
+        //     latitude: workingLocationQuery.workingLocation.latitude,
+        //     musics: selectedSongsQuery.selectedSongs.map(music => {
+        //         return {
+        //             trackId: music.id,
+        //             trackService: music.trackService,
+        //             title: music.title
+        //         }
+        //     })
+        // })
+        console.log(this.props.client)
+        // this.props.client.mutate({
+        //     mutation: CREATE_MUSIC_MARK,
+        //     variables: {
+        //         longitude: workingLocationQuery.workingLocation.longitude,
+        //         latitude: workingLocationQuery.workingLocation.latitude,
+        //         musics: selectedSongsQuery.selectedSongs.map(music => {
+        //             return {
+        //                 trackId: music.id,
+        //                 trackService: music.trackService,
+        //                 title: music.title
+        //             }
+        //         })
+        //     }
+        // })
+        // this.props.client.mutate({
+        //     mutation: DELETE_MUSIC_MARK,
+        //     variables: {musicMarkId: "cjuyb6pnl001n071382addjum"}
+        // }).then(d => console.log(d)).catch(e => console.log(e))
+        createMusicMark({
+            variables: {
+                longitude: Number(workingLocationQuery.workingLocation.longitude.toFixed(5)),
+                latitude: Number(workingLocationQuery.workingLocation.latitude.toFixed(5)),
+                musics: selectedSongsQuery.selectedSongs.map(music => {
+                    return {
+                        trackId: music.id,
+                        trackService: music.trackService,
+                        title: music.title
+                    }
+                })
+            }
+        }).catch(err => console.log(err))
     }
 
     // shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean {
@@ -63,20 +105,25 @@ class GlobalFooter extends React.Component {
 
     render() {
         console.log(this.props);
-        const {playStatusQuery, currentSongQuery, selectedSongsQuery} = this.props;
+        const {playStatusQuery, currentSongQuery, selectedSongsQuery, workingLocationQuery} = this.props;
         return (
             <View style={{marginBottom: -4}}>
                 {
                     selectedSongsQuery.selectedSongs.length ?
-                        <View style={styles.addBoxContainer}>
-                            <View style={styles.addBoxView}>
-                                <Text style={styles.addMusicText}>{selectedSongsQuery.selectedSongs.length} music is selected.</Text>
-                                <View style={styles.addMusicButtonView}>
-                                    <Text style={styles.addMusicButton} onPress={() => this._addMusicsToMark()}>Add</Text>
-                                    <Icon type={'font-awesome'} name={'plus-circle'} onPress={() => this._addMusicsToMark()}/>
+                        <Mutation mutation={CREATE_MUSIC_MARK}
+                                  update={(client, {data}) => console.log(data)}>
+                        {(createMusicMark, {loading, error, data, client}) => (
+                            <View style={styles.addBoxContainer}>
+                                <View style={styles.addBoxView}>
+                                    <Text style={styles.addMusicText}>{selectedSongsQuery.selectedSongs.length} music is selected.</Text>
+                                    <View style={styles.addMusicButtonView}>
+                                        <Text style={styles.addMusicButton} onPress={() => this._addMusicMark(createMusicMark, workingLocationQuery, selectedSongsQuery)}>Add</Text>
+                                        <Icon type={'font-awesome'} name={'plus-circle'}/>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
+                            )}
+                        </Mutation>
                         : null
                 }
                 <View style={styles.playerContainer}>
@@ -222,4 +269,5 @@ export default compose(
     graphql(GET_CURRENT_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongsQuery'}),
     graphql(GET_CURRENT_SONG, {options: { fetchPolicy: 'cache-only' }, name: 'currentSongQuery'}),
     graphql(GET_SELECTED_SONGS, {options: { fetchPolicy: 'cache-only' }, name: 'selectedSongsQuery'}),
+    graphql(GET_WORKING_LOCATION, {options: { fetchPolicy: 'cache-only' }, name: 'workingLocationQuery'}),
     )(GlobalFooter)

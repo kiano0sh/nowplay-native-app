@@ -33,9 +33,9 @@ const Login = (props) => {
     return (
         <Mutation
             mutation={login}
-            update={(cache, {data: {login: {token}}}) => {
+            update={(client, {data: {login: {token}}}) => {
                 console.log(token);
-                cache.writeQuery({
+                client.writeQuery({
                     query: GET_TOKEN,
                     data: {token}
                 });

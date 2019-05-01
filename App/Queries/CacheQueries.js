@@ -14,6 +14,16 @@ export const GET_PLAY_STATUS = gql`
     }
 `;
 
+export const GET_WORKING_LOCATION = gql`
+    {
+        workingLocation @client {
+            longitude,
+            latitude
+        }
+    }
+`;
+
+
 export const GET_CURRENT_SONG_REF = gql`
     {
         currentSongRef @client
@@ -70,6 +80,12 @@ export const GET_SELECTED_SONGS = gql`
 export const UPDATE_CURRENT_STACK = gql`
     mutation updateCurrentStack($music: Object!) {
         updateCurrentStack(music: $music) @client
+    }
+`;
+
+export const UPDATE_WORKING_LOCATION = gql`
+    mutation updateWorkingLocation($workingLocation: Object!) {
+        updateWorkingLocation(workingLocation: $workingLocation) @client
     }
 `;
 

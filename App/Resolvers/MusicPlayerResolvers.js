@@ -7,7 +7,7 @@ import {
     PLAY_NEXT_SONG,
     PLAY_PREVIOUS_SONG,
     GET_CURRENT_TIME,
-    GET_CURRENT_SONG_REF,
+    GET_WORKING_LOCATION,
     GET_SELECTED_SONGS,
 } from "../Queries/CacheQueries";
 import {streamUrl} from "../API/Soundcloud/soundcloudHelper";
@@ -15,6 +15,21 @@ import MusicControl from 'react-native-music-control';
 import React from "react";
 
 const musicPlayerResolvers = {
+    updateWorkingLocation: (root, args, {cache, client}) => {
+        const {workingLocation: {longitude, latitude} } = args
+        console.log(args.workingLocation, 'cache')
+        client.writeQuery({
+            query: GET_WORKING_LOCATION,
+            data: {
+                workingLocation: {
+                    __typename: "Location",
+                    longitude,
+                    latitude
+                }
+            }
+        })
+        return null
+    },
     updateCurrentStack: (root, args, {cache, client}) => {
         let {music} = args;
         let {currentSongs} = cache.readQuery({query: GET_CURRENT_SONGS});
@@ -201,6 +216,7 @@ const musicPlayerResolvers = {
     },
     updateSelectedSongs: (root, args, {cache, client}) => {
         let {selectedSong} = args;
+        console.log(selectedSong)
         const {selectedSongs} = cache.readQuery({query: GET_SELECTED_SONGS});
 
         let selectedSongsShadow = Object.assign([], selectedSongs);

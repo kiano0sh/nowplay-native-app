@@ -11,7 +11,7 @@ import {ApolloProvider, withApollo} from "react-apollo";
 import {client} from "./ApolloClient";
 import {ThemeProvider} from 'react-native-elements';
 import Navigations from './Navigations'
-import GlobalFooter from './MusicPlayer/GlobalFooter'
+import GlobalFooter from './Components/MusicPlayer/GlobalFooter'
 
 
 class App extends React.Component {

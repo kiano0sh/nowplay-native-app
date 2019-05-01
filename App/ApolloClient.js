@@ -1,8 +1,9 @@
-import {ApolloClient, HttpLink, InMemoryCache} from 'apollo-boost';
+import {ApolloClient, HttpLink, InMemoryCache, ApolloLink, concat} from 'apollo-boost';
 import {GET_TOKEN} from "./Queries/CacheQueries";
 import {persistCache} from 'apollo-cache-persist';
 import {AsyncStorage} from 'react-native';
 import musicPlayerResolvers from './Resolvers/MusicPlayerResolvers'
+import { onError } from "apollo-link-error";
 
 const cache = new InMemoryCache();
 
@@ -11,18 +12,42 @@ export const waitOnCache = persistCache({
     storage: AsyncStorage,
 });
 
+const errorLink = onError(({ networkError, graphQLErrors }) => {
+    if (graphQLErrors) {
+      graphQLErrors.map(({ message, locations, path }) =>
+        console.log(
+          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+        ),
+      );
+    }
+    if (networkError) console.log(`[Network error]: ${networkError}`);
+  });
+
+const httpLink = new HttpLink({ uri: 'http://192.168.1.33:4000'});
+
+const authMiddleware = new ApolloLink((operation, forward) => {
+  // add the authorization to the headers
+  const token = cache.readQuery({query: GET_TOKEN}).token
+  operation.setContext({
+    headers: {
+      Authorization: token ? `Bearer ${token}` : ''
+    }
+  });
+
+  return forward(operation);
+})
+
+const link = ApolloLink.from([errorLink, authMiddleware.concat(httpLink)])
 
 export const client = new ApolloClient({
-    link: new HttpLink({
-        uri: 'http://192.168.1.33:4000',
-        // uri: 'http://5.9.213.173:4000/',
-    }),
+    link,
     cache,
     resolvers: {
         Mutation: {
             ...musicPlayerResolvers,
         }
-    }
+    },
+    queryDeduplication: true,
 });
 
 // initialize cache
@@ -41,10 +66,11 @@ cache.writeData({
 export const updateHeaders = () => client.link = {
     ...client.link,
     headers: {
-        authorization: client.cache.readQuery({query: GET_TOKEN})
+        ...client.link.headers,
+        Authorization: `Bearer ${cache.readQuery({query: GET_TOKEN}).token}`
     }
 };
 
-waitOnCache.then(() => {
-    updateHeaders()
-});
+// waitOnCache.then(() => {
+//     updateHeaders()
+// });
