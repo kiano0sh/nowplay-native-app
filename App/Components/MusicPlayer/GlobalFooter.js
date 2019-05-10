@@ -1,6 +1,6 @@
 import React from 'react'
 import {StyleSheet, View} from 'react-native'
-import {Text, Icon} from 'react-native-elements'
+import {Text, Icon, Overlay} from 'react-native-elements'
 import {
     GET_PLAY_STATUS,
     GET_CURRENT_SONGS,
@@ -49,37 +49,6 @@ class GlobalFooter extends React.Component {
     };
 
     _addMusicMark(createMusicMark, workingLocationQuery, selectedSongsQuery) {
-        // console.log(selectedSongsQuery.selectedSongs)
-        // console.log({
-        //     longitude: workingLocationQuery.workingLocation.longitude,
-        //     latitude: workingLocationQuery.workingLocation.latitude,
-        //     musics: selectedSongsQuery.selectedSongs.map(music => {
-        //         return {
-        //             trackId: music.id,
-        //             trackService: music.trackService,
-        //             title: music.title
-        //         }
-        //     })
-        // })
-        console.log(this.props.client)
-        // this.props.client.mutate({
-        //     mutation: CREATE_MUSIC_MARK,
-        //     variables: {
-        //         longitude: workingLocationQuery.workingLocation.longitude,
-        //         latitude: workingLocationQuery.workingLocation.latitude,
-        //         musics: selectedSongsQuery.selectedSongs.map(music => {
-        //             return {
-        //                 trackId: music.id,
-        //                 trackService: music.trackService,
-        //                 title: music.title
-        //             }
-        //         })
-        //     }
-        // })
-        // this.props.client.mutate({
-        //     mutation: DELETE_MUSIC_MARK,
-        //     variables: {musicMarkId: "cjuyb6pnl001n071382addjum"}
-        // }).then(d => console.log(d)).catch(e => console.log(e))
         createMusicMark({
             variables: {
                 longitude: Number(workingLocationQuery.workingLocation.longitude.toFixed(5)),
@@ -112,17 +81,27 @@ class GlobalFooter extends React.Component {
                     selectedSongsQuery.selectedSongs.length ?
                         <Mutation mutation={CREATE_MUSIC_MARK}
                                   update={(client, {data}) => console.log(data)}>
-                        {(createMusicMark, {loading, error, data, client}) => (
-                            <View style={styles.addBoxContainer}>
-                                <View style={styles.addBoxView}>
-                                    <Text style={styles.addMusicText}>{selectedSongsQuery.selectedSongs.length} music is selected.</Text>
-                                    <View style={styles.addMusicButtonView}>
-                                        <Text style={styles.addMusicButton} onPress={() => this._addMusicMark(createMusicMark, workingLocationQuery, selectedSongsQuery)}>Add</Text>
-                                        <Icon type={'font-awesome'} name={'plus-circle'}/>
+                        {
+                            (createMusicMark, {loading, error, data, client}) => (
+                            <View>
+                                <View style={styles.addBoxContainer}>
+                                    <View style={styles.addBoxView}>
+                                        <Text style={styles.addMusicText}>{selectedSongsQuery.selectedSongs.length} song is selected.</Text>
+                                        <View style={styles.addMusicButtonView}>
+                                            <Text style={styles.addMusicButton}
+                                                onPress={() => this._addMusicMark(createMusicMark, workingLocationQuery, selectedSongsQuery)}>
+                                                Add
+                                            </Text>
+                                            <Icon type={'font-awesome'} name={'plus-circle'}/>
+                                        </View>
                                     </View>
                                 </View>
+                                {/* TODO Custom compnent for loading and error */}
+                                {loading && <Text>Loading...</Text>}
+                                {error && <Text>{error.message}</Text>}
+                                {data && <Text>yeeey</Text>}
                             </View>
-                            )}
+                        )}
                         </Mutation>
                         : null
                 }
