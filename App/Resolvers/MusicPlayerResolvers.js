@@ -9,6 +9,7 @@ import {
     GET_CURRENT_TIME,
     GET_WORKING_LOCATION,
     GET_SELECTED_SONGS,
+    GET_CURRENT_ROUTE_NAME,
 } from "../Queries/CacheQueries";
 import {streamUrl} from "../API/Soundcloud/soundcloudHelper";
 import MusicControl from 'react-native-music-control';
@@ -17,7 +18,7 @@ import React from "react";
 const musicPlayerResolvers = {
     updateWorkingLocation: (root, args, {cache, client}) => {
         const {workingLocation: {longitude, latitude} } = args
-        console.log(args.workingLocation, 'cache')
+        // console.log(args.workingLocation, 'cache')
         client.writeQuery({
             query: GET_WORKING_LOCATION,
             data: {
@@ -27,6 +28,15 @@ const musicPlayerResolvers = {
                     latitude
                 }
             }
+        })
+        return null
+    },
+    updateCurrentRouteName: (root, args, {cache, client}) => {
+        const {currentRouteName} = args
+        console.log(currentRouteName, 'cache')
+        client.writeQuery({
+            query: GET_CURRENT_ROUTE_NAME,
+            data: {currentRouteName}
         })
         return null
     },
@@ -94,7 +104,7 @@ const musicPlayerResolvers = {
     playCurrentSong: (root, args, {cache, client}) => {
 
         const {currentSong} = cache.readQuery({query: GET_CURRENT_SONG});
-        console.log(currentSong.streamUrl);
+        // console.log(currentSong.streamUrl);
 
         // Seeking
         MusicControl.enableControl("seekForward", false); // iOS only
@@ -216,7 +226,7 @@ const musicPlayerResolvers = {
     },
     updateSelectedSongs: (root, args, {cache, client}) => {
         let {selectedSong} = args;
-        console.log(selectedSong)
+        // console.log(selectedSong)
         const {selectedSongs} = cache.readQuery({query: GET_SELECTED_SONGS});
 
         let selectedSongsShadow = Object.assign([], selectedSongs);

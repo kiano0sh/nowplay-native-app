@@ -8,7 +8,11 @@ import {
   Image,
   SafeAreView,
 } from 'react-native';
-import { UPDATE_WORKING_LOCATION } from '../../Queries/CacheQueries';
+import {
+  UPDATE_WORKING_LOCATION,
+  UPDATE_CURRENT_ROUTE_NAME,
+} from '../../Queries/CacheQueries';
+import { MARKS_AROUND } from '../../Queries/Qurey';
 import { Button, SearchBar, Text } from 'react-native-elements';
 import MapView from 'react-native-maps';
 import { Marker, Circle } from 'react-native-maps';
@@ -16,6 +20,7 @@ import { PermissionsAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { UrlTile, Callout } from 'react-native-maps';
 import { withApollo } from 'react-apollo';
+import GlobalFooter from '../MusicPlayer/GlobalFooter';
 
 const { width, height } = Dimensions.get('window');
 
@@ -47,6 +52,7 @@ class GoogleMapScreen extends React.Component {
         accuracy: 1,
       },
       search: '',
+      marksAround: [],
     };
   }
 
@@ -65,6 +71,17 @@ class GoogleMapScreen extends React.Component {
           }
         });
       }
+    });
+  }
+
+  componentWillMount() {
+    this.props.navigation.addListener('willFocus', () => {
+      this.props.client.mutate({
+        mutation: UPDATE_CURRENT_ROUTE_NAME,
+        variables: {
+          currentRouteName: this.props.navigation.state.routeName,
+        },
+      });
     });
   }
 
@@ -95,7 +112,7 @@ class GoogleMapScreen extends React.Component {
   getCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition(
       position => {
-        console.log(position);
+        // console.log(position);
         this.setState((state, props) => {
           return {
             region: {
@@ -123,27 +140,38 @@ class GoogleMapScreen extends React.Component {
     this.setState({ search });
   };
 
+  getOtherMarks = newRegion => {
+    // console.log(newRegion);
+    let { longitude, latitude } = newRegion;
+    this.setState({
+      region: {
+        ...this.state.region,
+        longitude,
+        latitude,
+      },
+    });
+    let marksAround = this.props.client
+      .query({
+        query: MARKS_AROUND,
+        variables: {
+          longitude: Number(longitude.toFixed(5)),
+          latitude: Number(latitude.toFixed(5)),
+          maxradiuskm: 200,
+        },
+      })
+      .then(marks => this.setState({ marksAround: marks.data.marksAround }))
+      .catch(err => console.log(err));
+  };
+
   render() {
-    // console.log(this.state.region)
-    const { currentLocation } = this.state;
+    console.log(this.props.navigation.state.routeName);
+    const { currentLocation, marksAround } = this.state;
+    console.log('reneder');
+
+    // console.log(marksAround, 'render');
 
     return (
       <View style={{ flex: 1 }}>
-        {/* <SearchBar
-          ref="searchBar"
-          placeholder="Find me"
-          barStyle="black"
-          showsCancelButtonWhileEditing={false}
-          lightTheme={true}
-          searchIcon={false}
-          onChangeText={this.updateSearch}
-          value={this.state.search}
-          containerStyle={styles.containerStyle}
-        /> */}
-        {/* <TextInput
-          onChangeText={this.updateSearch}
-          style={styles.searchBar}
-        /> */}
         <MapView
           region={this.state.region}
           style={styles.map}
@@ -152,13 +180,15 @@ class GoogleMapScreen extends React.Component {
           zoomEnabled={true}
           pitchEnabled={true}
           rotateEnabled={true}
+          showsUserLocation={true}
+          followsUserLocation={true}
+          onRegionChangeComplete={this.getOtherMarks}
         >
           {currentLocation && (
             <Marker
               coordinate={currentLocation.coords}
-              // image={circleIcon.uri}
               onPress={e => {
-                console.log(e.nativeEvent);
+                // console.log(e.nativeEvent);
                 this.props.client.mutate({
                   mutation: UPDATE_WORKING_LOCATION,
                   variables: {
@@ -173,12 +203,30 @@ class GoogleMapScreen extends React.Component {
               title={'You'}
             />
           )}
+          {marksAround.length
+            ? marksAround.map((mark, index) => {
+                // console.log(mark)
+                return (
+                  <Marker
+                    key={index}
+                    coordinate={{
+                      latitude: mark.latitude,
+                      longitude: mark.longitude,
+                    }}
+                  />
+                );
+              })
+            : null}
         </MapView>
         <Callout>
           <View style={styles.calloutView}>
-            <TextInput style={styles.calloutSearch} placeholder={'Search a place'} />
+            <TextInput
+              style={styles.calloutSearch}
+              placeholder={'Search a place'}
+            />
           </View>
         </Callout>
+        {/* <GlobalFooter/> */}
       </View>
     );
   }

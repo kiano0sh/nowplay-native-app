@@ -73,7 +73,6 @@ class GlobalFooter extends React.Component {
     // }
 
     render() {
-        console.log(this.props);
         const {playStatusQuery, currentSongQuery, selectedSongsQuery, workingLocationQuery} = this.props;
         return (
             <View style={{marginBottom: -4}}>

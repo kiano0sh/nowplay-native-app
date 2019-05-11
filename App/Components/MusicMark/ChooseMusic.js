@@ -15,7 +15,8 @@ import {
     GET_SELECTED_SONGS,
     PLAY_CURRENT_SONG,
     UPDATE_CURRENT_STACK,
-    UPDATE_SELECTED_SONGS
+    UPDATE_SELECTED_SONGS,
+    UPDATE_CURRENT_ROUTE_NAME
 } from '../../Queries/CacheQueries'
 import {compose, graphql} from 'react-apollo';
 import { withApollo } from 'react-apollo';
@@ -50,6 +51,17 @@ class ChooseMusic extends React.Component {
     componentWillUnmount(): void {
         this.props.client.mutate({mutation: CLEAR_SELECTED_SONGS})
     }
+
+    componentWillMount() {
+        this.props.navigation.addListener('willFocus', () => {
+          this.props.client.mutate({
+            mutation: UPDATE_CURRENT_ROUTE_NAME,
+            variables: {
+              currentRouteName: this.props.navigation.state.routeName,
+            },
+          });
+        });
+      }
 
     // add selected track to state
     _selectSong(selectedSong){

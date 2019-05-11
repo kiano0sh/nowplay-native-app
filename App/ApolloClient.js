@@ -60,6 +60,7 @@ export const client = new ApolloClient({
 cache.writeData({
   data: {
     token: null,
+    currentRouteName: '',
     currentSongs: [],
     selectedSongs: [],
     currentSong: null,

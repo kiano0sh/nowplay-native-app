@@ -231,3 +231,13 @@ export const MUSICS = gql`
         }
     }
 `;
+
+export const MARKS_AROUND = gql`
+    query MarksAround($longitude: Float!, $latitude: Float!, $maxradiuskm: Int!) {
+        marksAround(longitude: $longitude, latitude: $latitude, maxradiuskm: $maxradiuskm) {
+            id
+            longitude
+            latitude
+        }
+    }
+`;

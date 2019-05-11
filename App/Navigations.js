@@ -8,6 +8,7 @@ import ChooseMusic from './Components/MusicMark/ChooseMusic'
 import {ActivityIndicator, StatusBar, View, StyleSheet} from 'react-native';
 import {waitOnCache} from "./ApolloClient";
 
+
 class AuthLoadingScreen extends React.Component {
     constructor() {
         super();
@@ -46,8 +47,9 @@ const styles = StyleSheet.create({
 
 const AppStack = createStackNavigator({
     Home: GoogleMapScreen,
-    ChooseMusic
+    ChooseMusic,
 });
+
 const AuthStack = createStackNavigator({ Login });
 
 const Navigations = createAppContainer(createSwitchNavigator(

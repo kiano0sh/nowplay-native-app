@@ -7,50 +7,37 @@
  */
 
 import React from 'react';
-import {ApolloProvider, withApollo} from "react-apollo";
-import {client} from "./ApolloClient";
-import {ThemeProvider} from 'react-native-elements';
-import Navigations from './Navigations'
-import GlobalFooter from './Components/MusicPlayer/GlobalFooter'
+import { ApolloProvider, withApollo, Query } from 'react-apollo';
+import { client } from './ApolloClient';
+import { ThemeProvider } from 'react-native-elements';
+import Navigations from './Navigations';
+import GlobalFooter from './Components/MusicPlayer/GlobalFooter';
+import { GET_CURRENT_ROUTE_NAME } from './Queries/CacheQueries';
+import { Text } from 'react-native';
 
+const allowedScreens = ['Home', 'ChooseMusic'];
 
 class App extends React.Component {
-    constructor(props, context) {
-        super(props)
-        this.state = {
-            isFooter: false
-        };
-    }
-
-    // componentDidMount(): void {
-    //     console.log(this.props)
-    //     client.mutate({mutation: CLEAR_SELECTED_SONGS})
-    // }
-
-    handleNavigationChange = (prevState, newState, action) => {
-        if (newState.index === 1) {
-            this.setState({isFooter: true})
-        } else {
-            this.setState({isFooter: false})
-        }
-    };
-
-    render() {
-        const {isFooter} = this.state;
-        return (
-            <ApolloProvider client={client}>
-                <ThemeProvider>
-                    <Navigations ref={nav => {this.navigation = nav}}
-                                 onNavigationStateChange={this.handleNavigationChange}
-                    />
-                    {console.log(isFooter)}
-                    {isFooter ? <GlobalFooter navigation={this.navigation}/> : null}
-                </ThemeProvider>
-            </ApolloProvider>
-        )
-    }
+  render() {
+    return (
+      <ApolloProvider client={client}>
+        <ThemeProvider>
+          <Navigations />
+          <Query query={GET_CURRENT_ROUTE_NAME}>
+            {({ loading, error, data }) => {
+              if (loading) return 'Loading...';
+              if (error) return `Error! ${error.message}`;
+              const { currentRouteName } = data;
+              return currentRouteName &&
+                allowedScreens.find(screen => screen === currentRouteName) ? (
+                <GlobalFooter />
+              ) : null;
+            }}
+          </Query>
+        </ThemeProvider>
+      </ApolloProvider>
+    );
+  }
 }
 
-export default App
-
-
+export default App;
