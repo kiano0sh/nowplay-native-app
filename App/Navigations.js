@@ -5,6 +5,7 @@ import {CLEAR_SELECTED_SONGS, GET_TOKEN} from "./Queries/CacheQueries";
 import Login from './Components/Authentication/Login'
 import GoogleMapScreen from './Components/GoogleMap/GoogleMapScreen'
 import ChooseMusic from './Components/MusicMark/ChooseMusic'
+import MusicMarkDetails from './Components/MusicMark/MusicMarkDetails'
 import {ActivityIndicator, StatusBar, View, StyleSheet} from 'react-native';
 import {waitOnCache} from "./ApolloClient";
 
@@ -48,6 +49,7 @@ const styles = StyleSheet.create({
 const AppStack = createStackNavigator({
     Home: GoogleMapScreen,
     ChooseMusic,
+    MusicMarkDetails
 });
 
 const AuthStack = createStackNavigator({ Login });

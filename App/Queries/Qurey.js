@@ -115,7 +115,7 @@ export const MUSIC_MARKS = gql`
 `;
 
 export const MARK_DETAIL_BY_ID = gql`
-    query MusicMark($musicMarkId: String!) {
+    query MusicMark($musicMarkId: ID!) {
         musicMark(musicMarkId: $musicMarkId) {
             id
             title
@@ -125,34 +125,39 @@ export const MARK_DETAIL_BY_ID = gql`
             likedBy {
                 username
             }
+            favouriteFor {
+                username
+            }
             comments {
                 description
-                author
+                author {
+                    username
+                }
+                createdAt
             }
-            createdAt
             user {
                 username
                 musicMarks {
                     id
-                    longitude
-                    latitude
                 }
             }
             musics {
-                id
                 title
                 description
-                uri
-                createdAt
+                trackId
+                trackService
                 user {
                     username
-                    musicMarks {
-                        id
-                        longitude
-                        latitude
-                    }
                 }
+                artwork
+                artist
+                genre
+                duration
+                description
+                trackCreatedAt
+                createdAt
             }
+            createdAt
         }
     }
 `;
@@ -170,7 +175,10 @@ export const MARK_DETAIL_BY_USER = gql`
             }
             comments {
                 description
-                author
+                author {
+                    username
+                }
+                createdAt
             }
             createdAt
             user {

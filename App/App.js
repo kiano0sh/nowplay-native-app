@@ -15,7 +15,7 @@ import GlobalFooter from './Components/MusicPlayer/GlobalFooter';
 import { GET_CURRENT_ROUTE_NAME } from './Queries/CacheQueries';
 import { Text } from 'react-native';
 
-const allowedScreens = ['Home', 'ChooseMusic'];
+const allowedScreens = ['Home', 'ChooseMusic', 'MusicMarkDetails'];
 
 class App extends React.Component {
   render() {

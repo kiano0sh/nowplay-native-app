@@ -15,8 +15,7 @@ import {
     GET_WORKING_LOCATION
 } from "../../Queries/CacheQueries";
 import {CREATE_MUSIC_MARK, DELETE_MUSIC_MARK} from "../../Queries/Mutation"
-import { graphql, compose, Mutation} from 'react-apollo';
-import { withApollo } from 'react-apollo';
+import { graphql, compose, Mutation, withApollo} from 'react-apollo';
 import Video from "react-native-video";
 
 
@@ -57,7 +56,13 @@ class GlobalFooter extends React.Component {
                     return {
                         trackId: music.id,
                         trackService: music.trackService,
-                        title: music.title
+                        title: music.title,
+                        artwork: music.artwork_url || null,
+                        artist: music.artist || null,
+                        genre: music.genre || null,
+                        duration: music.duration / 1000,
+                        description: music.description || null,
+                        trackCreatedAt: music.trackCreatedAt,
                     }
                 })
             }

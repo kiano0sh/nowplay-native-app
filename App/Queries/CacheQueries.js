@@ -76,10 +76,20 @@ export const GET_SELECTED_SONGS = gql`
             trackService
             title
             artwork_url
-            username
+            artist
+            genre
+            duration
+            description
+            trackCreatedAt
         }
     }
 `;
+
+export const GET_CURRENT_PLAYLIST = gql`
+    {
+        currentPlaylist @client
+    }
+`
 
 // MUTATIONS
 
@@ -149,3 +159,9 @@ export const PLAY_PREVIOUS_SONG = gql`
         playPreviousSong @client
     }
 `;
+
+export const SET_CURRENT_PLAYLIST = gql`
+    mutation setCurrentPlaylist($currentPlaylist: Object!) {
+        setCurrentPlaylist(currentPlaylist: $currentPlaylist) @client
+    }
+`

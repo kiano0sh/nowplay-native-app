@@ -8,7 +8,7 @@ import {
 import { GET_TOKEN } from "./Queries/CacheQueries";
 import { persistCache } from "apollo-cache-persist";
 import { AsyncStorage } from "react-native";
-import musicPlayerResolvers from "./Resolvers/MusicPlayerResolvers";
+import mainResolvers from "./Resolvers/mainResolvers";
 import { onError } from "apollo-link-error";
 
 const cache = new InMemoryCache();
@@ -50,7 +50,7 @@ export const client = new ApolloClient({
   cache,
   resolvers: {
     Mutation: {
-      ...musicPlayerResolvers
+      ...mainResolvers
     }
   },
   queryDeduplication: true
@@ -66,7 +66,8 @@ cache.writeData({
     currentSong: null,
     playStatus: false,
     currentTime: null,
-    currentSongRef: null
+    currentSongRef: null,
+    currentPlaylist: null
   }
 });
 
