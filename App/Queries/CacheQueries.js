@@ -48,9 +48,10 @@ export const GET_CURRENT_SONG = gql`
             id
             streamUrl
             title
-            artwork_url
+            artwork
             duration
-            username
+            artist
+            playlist
         }
     }
 `;
@@ -62,9 +63,9 @@ export const GET_CURRENT_SONGS = gql`
             id
             streamUrl
             title
-            artwork_url
+            artwork
             duration
-            username
+            artist
         }
     }
 `;
@@ -75,7 +76,7 @@ export const GET_SELECTED_SONGS = gql`
             id
             trackService
             title
-            artwork_url
+            artwork
             artist
             genre
             duration
@@ -105,6 +106,11 @@ export const UPDATE_CURRENT_STACK = gql`
     }
 `;
 
+export const UPDATE_CURRENT_PLAYLIST_STACK = gql`
+mutation updateCurrentPlaylistStack($index: Int!) {
+    updateCurrentPlaylistStack(index: $index) @client
+}
+`;
 
 export const UPDATE_WORKING_LOCATION = gql`
     mutation updateWorkingLocation($workingLocation: Object!) {

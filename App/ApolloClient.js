@@ -29,7 +29,7 @@ const errorLink = onError(({ networkError, graphQLErrors }) => {
   if (networkError) console.log(`[Network error]: ${networkError}`);
 });
 
-const httpLink = new HttpLink({ uri: "http://192.168.1.34:4000" });
+const httpLink = new HttpLink({ uri: "http://192.168.1.35:4000" });
 
 const authMiddleware = new ApolloLink((operation, forward) => {
   // add the authorization to the headers

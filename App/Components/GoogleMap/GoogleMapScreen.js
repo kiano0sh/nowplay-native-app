@@ -157,6 +157,7 @@ class GoogleMapScreen extends React.Component {
           latitude: Number(latitude.toFixed(5)),
           maxradiuskm: 50,
         },
+        fetchPolicy: 'no-cache',
       })
       .then(marks => this.setState({ marksAround: marks.data.marksAround }))
       .catch(err => console.log(err));

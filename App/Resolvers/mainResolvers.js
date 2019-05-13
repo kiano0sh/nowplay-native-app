@@ -12,7 +12,7 @@ import {
   GET_CURRENT_ROUTE_NAME,
   GET_CURRENT_PLAYLIST,
 } from '../Queries/CacheQueries';
-import { streamUrl } from '../API/Soundcloud/soundcloudHelper';
+import { streamUrl, getStreamUrl } from '../API/Soundcloud/soundcloudHelper';
 import MusicControl from 'react-native-music-control';
 import React from 'react';
 
@@ -21,7 +21,6 @@ const mainResolvers = {
     const {
       workingLocation: { longitude, latitude },
     } = args;
-    // console.log(args.workingLocation, 'cache')
     client.writeQuery({
       query: GET_WORKING_LOCATION,
       data: {
@@ -36,7 +35,6 @@ const mainResolvers = {
   },
   updateCurrentRouteName: (root, args, { cache, client }) => {
     const { currentRouteName } = args;
-    console.log(currentRouteName, 'cache');
     client.writeQuery({
       query: GET_CURRENT_ROUTE_NAME,
       data: { currentRouteName },
@@ -45,6 +43,16 @@ const mainResolvers = {
   },
   updateCurrentStack: (root, args, { cache, client }) => {
     let { music } = args;
+
+    const { currentSong } = cache.readQuery({ query: GET_CURRENT_SONG });
+
+    if (currentSong.playlist) {
+      client.writeQuery({
+        query: GET_CURRENT_SONGS,
+        data: { currentSongs: [] },
+      });
+    }
+
     let { currentSongs } = cache.readQuery({ query: GET_CURRENT_SONGS });
 
     let currentSongsShadow = Object.assign([], currentSongs);
@@ -70,14 +78,15 @@ const mainResolvers = {
         id: music.id,
         streamUrl: streamUrl(music.uri),
         title: music.title,
-        artwork_url: !!music.artwork_url
+        artwork: !!music.artwork_url
           ? music.artwork_url
           : music.user.avatar_url,
         duration: music.duration,
-        username: music.user.username,
+        artist: music.user.username,
         genre: music.genre,
         description: music.description,
         created_at: music.created_at,
+        playlist: false,
       });
     }
 
@@ -95,12 +104,6 @@ const mainResolvers = {
   updateCurrentSongRef: (root, args, { cache, client }) => {
     let { currentSongRef } = args;
 
-    // console.log(currentSongRef, 'resolved')
-    // console.log(cache)
-    //
-    // setTimeout(() => console.log(currentSongRef.props.muted = true, 'resolved'), 5000)
-    // console.log(currentSongRef)
-    //
     // client.writeQuery({
     //     query: GET_CURRENT_SONG_REF,
     //     data: {
@@ -110,7 +113,6 @@ const mainResolvers = {
   },
   playCurrentSong: (root, args, { cache, client }) => {
     const { currentSong } = cache.readQuery({ query: GET_CURRENT_SONG });
-    // console.log(currentSong.streamUrl);
 
     // Seeking
     MusicControl.enableControl('seekForward', false); // iOS only
@@ -148,8 +150,8 @@ const mainResolvers = {
     // update what's playing
     MusicControl.setNowPlaying({
       title: currentSong.title || '',
-      artwork: currentSong.artwork_url || '',
-      artist: currentSong.username || '',
+      artwork: currentSong.artwork || '',
+      artist: currentSong.artist || '',
       genre: currentSong.genre || '',
       duration: currentSong.duration / 1000,
       description: currentSong.description || '',
@@ -182,7 +184,6 @@ const mainResolvers = {
   },
   setCurrentTime: (root, args, { client }) => {
     let { currentTime } = args;
-    // console.log(currentTime, 'in cache')
 
     client.writeQuery({
       query: GET_CURRENT_TIME,
@@ -241,7 +242,6 @@ const mainResolvers = {
   },
   updateSelectedSongs: (root, args, { cache, client }) => {
     let { selectedSong } = args;
-    // console.log(selectedSong)
     const { selectedSongs } = cache.readQuery({ query: GET_SELECTED_SONGS });
 
     let selectedSongsShadow = Object.assign([], selectedSongs);
@@ -251,18 +251,15 @@ const mainResolvers = {
       id: selectedSong.id,
       trackService: 'Soundcloud',
       title: selectedSong.title,
-      artwork_url: !!selectedSong.artwork_url
+      artwork: !!selectedSong.artwork_url
         ? selectedSong.artwork_url
         : selectedSong.user.avatar_url,
       artist: selectedSong.user.username,
       genre: selectedSong.genre || null,
-      duration: selectedSong.duration / 1000,
+      duration: selectedSong.duration,
       description: selectedSong.description || null,
       trackCreatedAt: selectedSong.created_at,
     };
-
-    console.log(customItem);
-
 
     let itemIndex = selectedSongsShadow.findIndex(
       element => element.id === customItem.id,
@@ -291,14 +288,34 @@ const mainResolvers = {
   },
   setCurrentPlaylist: (root, args, { client }) => {
     const { currentPlaylist } = args;
-    console.log(currentPlaylist, 'cache');
-
     client.writeQuery({
       query: GET_CURRENT_PLAYLIST,
       data: { currentPlaylist },
     });
 
-    return null
+    return null;
+  },
+  updateCurrentPlaylistStack: (root, args, { client, cache }) => {
+    const { index } = args;
+    const {
+      currentPlaylist: { musics },
+    } = cache.readQuery({ query: GET_CURRENT_PLAYLIST });
+    console.log(musics, index);
+
+    client.writeQuery({
+      query: GET_CURRENT_SONGS,
+      data: { currentSongs: musics },
+    });
+
+    musics[index].streamUrl = getStreamUrl(musics[index].trackId);
+    musics[index].playlist = true;
+
+    client.writeQuery({
+      query: GET_CURRENT_SONG,
+      data: { currentSong: musics[index] },
+    });
+
+    return null;
   },
 };
 

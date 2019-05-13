@@ -57,11 +57,11 @@ class GlobalFooter extends React.Component {
                         trackId: music.id,
                         trackService: music.trackService,
                         title: music.title,
-                        artwork: music.artwork_url || null,
-                        artist: music.artist || null,
-                        genre: music.genre || null,
-                        duration: music.duration / 1000,
-                        description: music.description || null,
+                        artwork: music.artwork,
+                        artist: music.artist,
+                        genre: music.genre,
+                        duration: music.duration,
+                        description: music.description,
                         trackCreatedAt: music.trackCreatedAt,
                     }
                 })

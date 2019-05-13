@@ -153,9 +153,7 @@ class ChooseMusic extends React.Component {
         />
     );
 
-    // handling songs stack
     _updateStack = (music) => {
-
         this.props.client.mutate({
             mutation: UPDATE_CURRENT_STACK,
             variables: {music}
@@ -164,10 +162,6 @@ class ChooseMusic extends React.Component {
         this.props.client.mutate({
             mutation: PLAY_CURRENT_SONG
         });
-
-        console.log(this.props.client.cache.readQuery({query: GET_CURRENT_SONGS}), 'after')
-        console.log(this.props.client.cache.readQuery({query: GET_PLAY_STATUS}), 'after')
-
     };
 
     _nextPage = () => {
@@ -209,7 +203,7 @@ class ChooseMusic extends React.Component {
     render() {
         const {search, loading, collection} = this.state;
         return (
-            <View>
+            <View style={{backgroundColor: '#121619', flex: 1}}>
                 <SearchBar
                     placeholder="Search Music Here..."
                     onChangeText={this.updateSearch}

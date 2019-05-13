@@ -142,6 +142,7 @@ export const MARK_DETAIL_BY_ID = gql`
                 }
             }
             musics {
+                id
                 title
                 description
                 trackId
