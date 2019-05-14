@@ -9,7 +9,7 @@ import {
   SafeAreView,
 } from 'react-native';
 import {
-  UPDATE_WORKING_LOCATION,
+  UPDATE_CURRENT_MARK_LOCATION,
   UPDATE_CURRENT_ROUTE_NAME,
   SET_CURRENT_PLAYLIST,
 } from '../../Queries/CacheQueries';
@@ -202,9 +202,9 @@ class GoogleMapScreen extends React.Component {
               coordinate={currentLocation.coords}
               onPress={e => {
                 this.props.client.mutate({
-                  mutation: UPDATE_WORKING_LOCATION,
+                  mutation: UPDATE_CURRENT_MARK_LOCATION,
                   variables: {
-                    workingLocation: {
+                    currentMarkLocation: {
                       longitude: e.nativeEvent.coordinate.longitude,
                       latitude: e.nativeEvent.coordinate.latitude,
                     },
@@ -225,7 +225,6 @@ class GoogleMapScreen extends React.Component {
                       latitude: mark.latitude,
                       longitude: mark.longitude,
                     }}
-                    // onPress={() => }
                     onPress={() => this.getMusicMarkDetails(mark.id)}
                   >
                     <Icon

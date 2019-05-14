@@ -1,173 +1,189 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 
 // QUERIES
 
 export const GET_TOKEN = gql`
-    {
-        token @client
-    }
+  {
+    token @client
+  }
 `;
 
 export const GET_CURRENT_ROUTE_NAME = gql`
-    {
-        currentRouteName @client
-    }
+  {
+    currentRouteName @client
+  }
 `;
 
 export const GET_PLAY_STATUS = gql`
-    {
-        playStatus @client
-    }
+  {
+    playStatus @client
+  }
 `;
 
-export const GET_WORKING_LOCATION = gql`
-    {
-        workingLocation @client {
-            longitude,
-            latitude
-        }
+export const GET_CURRENT_MARK_LOCATION = gql`
+  {
+    currentMarkLocation @client {
+      longitude
+      latitude
     }
+  }
 `;
-
 
 export const GET_CURRENT_SONG_REF = gql`
-    {
-        currentSongRef @client
-    }
+  {
+    currentSongRef @client
+  }
 `;
 
 export const GET_CURRENT_TIME = gql`
-    {
-        currentTime @client
-    }
+  {
+    currentTime @client
+  }
 `;
 
 export const GET_CURRENT_SONG = gql`
-    {
-        currentSong @client {
-            id
-            streamUrl
-            title
-            artwork
-            duration
-            artist
-            playlist
-        }
+  {
+    currentSong @client {
+      id
+      streamUrl
+      title
+      artwork
+      duration
+      artist
+      playlist
     }
+  }
 `;
 
-
 export const GET_CURRENT_SONGS = gql`
-    {
-        currentSongs @client {
-            id
-            streamUrl
-            title
-            artwork
-            duration
-            artist
-        }
+  {
+    currentSongs @client {
+      id
+      streamUrl
+      title
+      artwork
+      duration
+      artist
+      playlist
     }
+  }
 `;
 
 export const GET_SELECTED_SONGS = gql`
-    {
-        selectedSongs @client {
-            id
-            trackService
-            title
-            artwork
-            artist
-            genre
-            duration
-            description
-            trackCreatedAt
-        }
+  {
+    selectedSongs @client {
+      id
+      trackService
+      title
+      artwork
+      artist
+      genre
+      duration
+      trackCreatedAt
     }
+  }
 `;
 
 export const GET_CURRENT_PLAYLIST = gql`
-    {
-        currentPlaylist @client
-    }
-`
+  {
+    currentPlaylist @client
+  }
+`;
+
+export const GET_PLAYLIST_MODE = gql`
+  {
+    playlistMode @client
+  }
+`;
 
 // MUTATIONS
 
 export const UPDATE_CURRENT_ROUTE_NAME = gql`
-    mutation updateCurrentRouteName($currentRouteName: String!) {
-        updateCurrentRouteName(currentRouteName: $currentRouteName) @client
-    }
+  mutation updateCurrentRouteName($currentRouteName: String!) {
+    updateCurrentRouteName(currentRouteName: $currentRouteName) @client
+  }
 `;
 
 export const UPDATE_CURRENT_STACK = gql`
-    mutation updateCurrentStack($music: Object!) {
-        updateCurrentStack(music: $music) @client
-    }
+  mutation updateCurrentStack($music: Object!) {
+    updateCurrentStack(music: $music) @client
+  }
 `;
 
-export const UPDATE_CURRENT_PLAYLIST_STACK = gql`
-mutation updateCurrentPlaylistStack($index: Int!) {
-    updateCurrentPlaylistStack(index: $index) @client
-}
+export const UPDATE_CURRENT_PLAYLIST_SONG = gql`
+  mutation updateCurrentPlaylistSong($index: Int!) {
+    updateCurrentPlaylistSong(index: $index) @client
+  }
 `;
 
-export const UPDATE_WORKING_LOCATION = gql`
-    mutation updateWorkingLocation($workingLocation: Object!) {
-        updateWorkingLocation(workingLocation: $workingLocation) @client
-    }
+export const UPDATE_CURRENT_MARK_LOCATION = gql`
+  mutation updateCurrentMarkLocation($currentMarkLocation: Object!) {
+    updateCurrentMarkLocation(currentMarkLocation: $currentMarkLocation) @client
+  }
 `;
 
 export const UPDATE_CURRENT_SONG_REF = gql`
-    mutation updateCurrentSongRef($currentSongRef: Object!) {
-        updateCurrentSongRef(currentSongRef: $currentSongRef) @client
-    }
+  mutation updateCurrentSongRef($currentSongRef: Object!) {
+    updateCurrentSongRef(currentSongRef: $currentSongRef) @client
+  }
 `;
 
 export const UPDATE_SELECTED_SONGS = gql`
-    mutation updateSelectedSongs($selectedSong: Object!) {
-        updateSelectedSongs(selectedSong: $selectedSong) @client
-    }
+  mutation updateSelectedSongs($selectedSong: Object!) {
+    updateSelectedSongs(selectedSong: $selectedSong) @client
+  }
 `;
 
 export const CLEAR_SELECTED_SONGS = gql`
-    mutation clearSelectedSongs {
-        clearSelectedSongs @client
-    }
+  mutation clearSelectedSongs {
+    clearSelectedSongs @client
+  }
 `;
 
 export const PLAY_CURRENT_SONG = gql`
-    mutation playCurrentSong {
-        playCurrentSong @client
-    }
+  mutation playCurrentSong {
+    playCurrentSong @client
+  }
 `;
 
 export const PAUSE_CURRENT_SONG = gql`
-    mutation pauseCurrentSong {
-        pauseCurrentSong @client
-    }
+  mutation pauseCurrentSong {
+    pauseCurrentSong @client
+  }
 `;
 
 export const SET_CURRENT_TIME = gql`
-    mutation setCurrentTime($currentTime: Int!) {
-        setCurrentTime(currentTime: $currentTime) @client
-    }
+  mutation setCurrentTime($currentTime: Int!) {
+    setCurrentTime(currentTime: $currentTime) @client
+  }
 `;
 
 export const PLAY_NEXT_SONG = gql`
-    mutation playNextSong {
-        playNextSong @client
-    }
+  mutation playNextSong {
+    playNextSong @client
+  }
 `;
 
 export const PLAY_PREVIOUS_SONG = gql`
-    mutation playPreviousSong {
-        playPreviousSong @client
-    }
+  mutation playPreviousSong {
+    playPreviousSong @client
+  }
 `;
 
 export const SET_CURRENT_PLAYLIST = gql`
-    mutation setCurrentPlaylist($currentPlaylist: Object!) {
-        setCurrentPlaylist(currentPlaylist: $currentPlaylist) @client
-    }
-`
+  mutation setCurrentPlaylist($currentPlaylist: Object!) {
+    setCurrentPlaylist(currentPlaylist: $currentPlaylist) @client
+  }
+`;
+
+// export const UPDATE_CURRENT_PLAYLIST = gql`
+//   mutation updateCurrentPlaylist {
+//     updateCurrentPlaylist @client
+//   }
+// `;
+
+export const UPDATE_PLAYLIST_MODE = gql`
+  mutation updatePlaylistMode($playlistMode: Boolean!) {
+    updatePlaylistMode(playlistMode: $playlistMode) @client
+  }
+`;

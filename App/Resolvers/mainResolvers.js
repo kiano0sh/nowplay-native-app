@@ -7,24 +7,26 @@ import {
   PLAY_NEXT_SONG,
   PLAY_PREVIOUS_SONG,
   GET_CURRENT_TIME,
-  GET_WORKING_LOCATION,
+  GET_CURRENT_MARK_LOCATION,
   GET_SELECTED_SONGS,
   GET_CURRENT_ROUTE_NAME,
   GET_CURRENT_PLAYLIST,
+  GET_PLAYLIST_MODE,
 } from '../Queries/CacheQueries';
 import { streamUrl, getStreamUrl } from '../API/Soundcloud/soundcloudHelper';
 import MusicControl from 'react-native-music-control';
 import React from 'react';
 
 const mainResolvers = {
-  updateWorkingLocation: (root, args, { cache, client }) => {
+  updateCurrentMarkLocation: (root, args, { cache, client }) => {
     const {
-      workingLocation: { longitude, latitude },
+      currentMarkLocation: { longitude, latitude },
     } = args;
+
     client.writeQuery({
-      query: GET_WORKING_LOCATION,
+      query: GET_CURRENT_MARK_LOCATION,
       data: {
-        workingLocation: {
+        currentMarkLocation: {
           __typename: 'Location',
           longitude,
           latitude,
@@ -257,7 +259,6 @@ const mainResolvers = {
       artist: selectedSong.user.username,
       genre: selectedSong.genre || null,
       duration: selectedSong.duration,
-      description: selectedSong.description || null,
       trackCreatedAt: selectedSong.created_at,
     };
 
@@ -288,33 +289,70 @@ const mainResolvers = {
   },
   setCurrentPlaylist: (root, args, { client }) => {
     const { currentPlaylist } = args;
+
+    currentPlaylist.musics.map(music => {
+      music.streamUrl = getStreamUrl(music.trackId);
+      music.playlist = true;
+    });
+
     client.writeQuery({
       query: GET_CURRENT_PLAYLIST,
       data: { currentPlaylist },
     });
 
-    return null;
-  },
-  updateCurrentPlaylistStack: (root, args, { client, cache }) => {
-    const { index } = args;
-    const {
-      currentPlaylist: { musics },
-    } = cache.readQuery({ query: GET_CURRENT_PLAYLIST });
-    console.log(musics, index);
-
     client.writeQuery({
       query: GET_CURRENT_SONGS,
-      data: { currentSongs: musics },
+      data: { currentSongs: currentPlaylist.musics },
     });
 
-    musics[index].streamUrl = getStreamUrl(musics[index].trackId);
-    musics[index].playlist = true;
+    return null;
+  },
+  // updateCurrentPlaylist: (root, args, { client, cache }) => {
+  //   const { selectedSongs } = cache.readQuery({ query: GET_SELECTED_SONGS });
+  //   const { currentPlaylist: {musics} } = cache.readQuery({ query: GET_CURRENT_PLAYLIST });
+  //   console.log(musics);
+
+  //   const addedSongs = []
+  //   selectedSongs.map(song => {
+  //     addedSongs.push({
+  //       id: song.id,
+  //       streamUrl: getStreamUrl(song.trackId),
+  //       playlist: true,
+  //       title: song.title,
+  //       artwork: song.artwork,
+  //       duration: song.duration,
+  //       artist: song.artist,
+  //       __typename: "Music"
+  //     })
+  //   });
+
+  //   console.log(musics.concat(addedSongs));
+
+
+  //   client.writeQuery({
+  //     query: GET_CURRENT_PLAYLIST,
+  //     data: { currentPlaylist: musics.concat(addedSongs) },
+  //   });
+
+  // },
+  updateCurrentPlaylistSong: (root, args, { client, cache }) => {
+    const { index } = args;
+    const { currentSongs } = cache.readQuery({ query: GET_CURRENT_SONGS });
+    console.log(currentSongs);
 
     client.writeQuery({
       query: GET_CURRENT_SONG,
-      data: { currentSong: musics[index] },
+      data: { currentSong: currentSongs[index] },
     });
 
+    return null;
+  },
+  updatePlaylistMode: (root, args, { client }) => {
+    const { playlistMode } = args;
+    client.writeQuery({
+      query: GET_PLAYLIST_MODE,
+      data: { playlistMode },
+    });
     return null;
   },
 };

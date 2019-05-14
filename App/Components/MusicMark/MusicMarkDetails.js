@@ -1,25 +1,56 @@
 import React, { Component } from 'react';
-import { View, Text, Image, StyleSheet, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
 import { Card, ListItem, Button, Icon } from 'react-native-elements';
 import { graphql, compose, Mutation, withApollo } from 'react-apollo';
 import {
   GET_CURRENT_PLAYLIST,
   UPDATE_CURRENT_ROUTE_NAME,
-  UPDATE_CURRENT_PLAYLIST_STACK,
-  PLAY_CURRENT_SONG
+  UPDATE_CURRENT_PLAYLIST_SONG,
+  PLAY_CURRENT_SONG,
+  UPDATE_PLAYLIST_MODE,
 } from '../../Queries/CacheQueries';
+import { DELETE_MUSIC_MARK } from '../../Queries/Mutation';
 import { getMusicDetails } from '../../API/Soundcloud/soundcloudHelper';
 
 class MusicMarkDetails extends Component {
-  static navigationOptions = {
-    title: 'Playlist',
-    headerStyle: {
-      backgroundColor: '#393e42',
-    },
-    headerTintColor: '#fff',
-    headerTitleStyle: {
-      fontWeight: 'bold',
-    },
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: 'Playlist',
+      headerStyle: {
+        backgroundColor: '#393e42',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+      headerRight: (
+        <TouchableOpacity
+          onPress={() =>
+            navigation
+              .getParam('client')
+              .mutate({
+                mutation: DELETE_MUSIC_MARK,
+                variables: { musicMarkId: navigation.getParam('musicMarkId') },
+                fetchPolicy: 'no-cache',
+              })
+              .then(data => {
+                console.log(d);
+              })
+              .catch(err => console.log(err))
+          }
+          style={[{ paddingHorizontal: 15 }]}
+        >
+          <Icon type={'font-awesome'} name={'trash'} color={'#fff'} size={30} />
+        </TouchableOpacity>
+      ),
+    };
   };
 
   componentWillMount() {
@@ -33,16 +64,26 @@ class MusicMarkDetails extends Component {
     });
   }
 
+  componentDidMount() {
+    const {
+      currentPlaylistQuery: { currentPlaylist },
+    } = this.props;
+    this.props.navigation.setParams({
+      musicMarkId: currentPlaylist.id,
+      client: this.props.client,
+    });
+  }
+
   _updateStack = index => {
     console.log(index);
 
     this.props.client.mutate({
-        mutation: UPDATE_CURRENT_PLAYLIST_STACK,
-        variables: {index}
+      mutation: UPDATE_CURRENT_PLAYLIST_SONG,
+      variables: { index },
     });
 
     this.props.client.mutate({
-        mutation: PLAY_CURRENT_SONG
+      mutation: PLAY_CURRENT_SONG,
     });
   };
 
@@ -77,14 +118,21 @@ class MusicMarkDetails extends Component {
 
   render() {
     const {
-      currentPlaylistQuery: { currentPlaylist },
+      currentPlaylistQuery: {
+        currentPlaylist: { musics },
+      },
     } = this.props;
-    console.log(currentPlaylist);
     return (
-      <View style={{backgroundColor: '#121619', flex: 1}}>
+      <View style={{ backgroundColor: '#121619', flex: 1 }}>
         <Button
           title={'Add your favourite songs here!'}
-          onPress={() => this.props.navigation.navigate('ChooseMusic')}
+          onPress={() => {
+            this.props.client.mutate({
+              mutation: UPDATE_PLAYLIST_MODE,
+              variables: { playlistMode: true },
+            });
+            return this.props.navigation.navigate('ChooseMusic');
+          }}
           icon={
             <Icon
               type={'font-awesome'}
@@ -98,27 +146,9 @@ class MusicMarkDetails extends Component {
 
         <FlatList
           keyExtractor={this._keyExtractor}
-          data={currentPlaylist.musics}
+          data={musics}
           renderItem={this.renderItem}
         />
-
-        {/* <Card containerStyle={{ padding: 0 }}>
-          {currentPlaylist.musics.map((music, index) => {
-            console.log(music);
-
-            return (
-              <ListItem
-                key={index}
-                title={music.title}
-                leftAvatar={{
-                  source: { uri: music.artwork },
-                  rounded: false,
-                  size: 'large',
-                }}
-              />
-            );
-          })}
-        </Card> */}
       </View>
     );
   }

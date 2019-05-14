@@ -1,51 +1,109 @@
-import gql from "graphql-tag";
-
-//
-export const login = gql`
-    mutation Login($username: String, $password: String!) {
-        login(username: $username, password: $password) {
-            token
-        }
-    }
-`;
+import gql from 'graphql-tag';
 
 gql`
-enum trackServices {
+  enum trackServices {
     Soundcloud
     Spotify
     Youtube
-}`
+  }
+`;
 
 gql`
-input MusicInput {
+  input MusicInput {
     trackId: Int!
     trackService: trackServices!
     title: String
     description: String
-}`
+  }
+`;
 
-// Add music mark with at least one music
-export const CREATE_MUSIC_MARK = gql`
-    mutation CreateMusicMark($latitude: Float!, $longitude: Float!, $title: String, $description: String, $musics: [MusicInput!]!) {
-        createMusicMark(latitude: $latitude, longitude: $longitude, title: $title, description: $description, musics: $musics) {
-            id
-            latitude
-            longitude
-            title
-            description
-            musics {
-                id
-                title
-                description
-            }
-        }
+export const login = gql`
+  mutation login($username: String, $password: String!) {
+    login(username: $username, password: $password) {
+      token
     }
-`
+  }
+`;
+
+export const CREATE_MUSIC_MARK = gql`
+  mutation createMusicMark(
+    $latitude: Float!
+    $longitude: Float!
+    $title: String
+    $description: String
+    $musics: [MusicInput!]!
+  ) {
+    createMusicMark(
+      latitude: $latitude
+      longitude: $longitude
+      title: $title
+      description: $description
+      musics: $musics
+    ) {
+      id
+      latitude
+      longitude
+      title
+      description
+      musics {
+        id
+        title
+      }
+    }
+  }
+`;
 
 export const DELETE_MUSIC_MARK = gql`
-    mutation DeleteMusicMark($musicMarkId: ID!) {
-        deleteMusicMark(musicMarkId: $musicMarkId) {
-            id
-        }
+  mutation deleteMusicMark($musicMarkId: ID!) {
+    deleteMusicMark(musicMarkId: $musicMarkId) {
+      id
     }
-`
+  }
+`;
+
+export const ADD_MUSIC = gql`
+  mutation addMusic($musicMarkId: ID!, $musics: [MusicInput!]!) {
+    addMusic(musicMarkId: $musicMarkId, musics: $musics) {
+      id
+      title
+      description
+      longitude
+      latitude
+      likedBy {
+        username
+      }
+      favouriteFor {
+        username
+      }
+      comments {
+        description
+        author {
+          username
+        }
+        createdAt
+      }
+      user {
+        username
+        musicMarks {
+          id
+        }
+      }
+      musics {
+        id
+        title
+        trackId
+        trackService
+        user {
+          username
+        }
+        artwork
+        artist
+        genre
+        duration
+        trackCreatedAt
+        createdAt
+      }
+      createdAt
+    }
+  }
+`;
