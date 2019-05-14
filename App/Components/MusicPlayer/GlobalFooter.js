@@ -120,6 +120,7 @@ class GlobalFooter extends React.Component {
         const {
           data: { addMusic },
         } = result;
+        // TODO better solution
         this.props.client.mutate({
           mutation: SET_CURRENT_PLAYLIST,
           variables: {currentPlaylist: addMusic}

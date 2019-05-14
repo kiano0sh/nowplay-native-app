@@ -307,42 +307,22 @@ const mainResolvers = {
 
     return null;
   },
-  // updateCurrentPlaylist: (root, args, { client, cache }) => {
-  //   const { selectedSongs } = cache.readQuery({ query: GET_SELECTED_SONGS });
-  //   const { currentPlaylist: {musics} } = cache.readQuery({ query: GET_CURRENT_PLAYLIST });
-  //   console.log(musics);
-
-  //   const addedSongs = []
-  //   selectedSongs.map(song => {
-  //     addedSongs.push({
-  //       id: song.id,
-  //       streamUrl: getStreamUrl(song.trackId),
-  //       playlist: true,
-  //       title: song.title,
-  //       artwork: song.artwork,
-  //       duration: song.duration,
-  //       artist: song.artist,
-  //       __typename: "Music"
-  //     })
-  //   });
-
-  //   console.log(musics.concat(addedSongs));
-
-
-  //   client.writeQuery({
-  //     query: GET_CURRENT_PLAYLIST,
-  //     data: { currentPlaylist: musics.concat(addedSongs) },
-  //   });
-
-  // },
   updateCurrentPlaylistSong: (root, args, { client, cache }) => {
     const { index } = args;
-    const { currentSongs } = cache.readQuery({ query: GET_CURRENT_SONGS });
-    console.log(currentSongs);
+    const { currentPlaylist: {musics} } = cache.readQuery({ query: GET_CURRENT_PLAYLIST });
+    const { currentSong } = cache.readQuery({ query: GET_CURRENT_SONG });
+
+
+    if (currentSong === null || !currentSong.playlist) {
+      client.writeQuery({
+        query: GET_CURRENT_SONGS,
+        data: { currentSongs: musics },
+      });
+    }
 
     client.writeQuery({
       query: GET_CURRENT_SONG,
-      data: { currentSong: currentSongs[index] },
+      data: { currentSong: musics[index] },
     });
 
     return null;

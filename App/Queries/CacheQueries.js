@@ -176,12 +176,6 @@ export const SET_CURRENT_PLAYLIST = gql`
   }
 `;
 
-// export const UPDATE_CURRENT_PLAYLIST = gql`
-//   mutation updateCurrentPlaylist {
-//     updateCurrentPlaylist @client
-//   }
-// `;
-
 export const UPDATE_PLAYLIST_MODE = gql`
   mutation updatePlaylistMode($playlistMode: Boolean!) {
     updatePlaylistMode(playlistMode: $playlistMode) @client
