@@ -14,6 +14,7 @@ import Navigations from './Navigations';
 import GlobalFooter from './Components/MusicPlayer/GlobalFooter';
 import { GET_CURRENT_ROUTE_NAME } from './Queries/CacheQueries';
 import { Text } from 'react-native';
+import NavigationService from './NavigationService';
 
 // Allowed screens for GlobalFooter
 const allowedScreens = ['Home', 'ChooseMusic', 'MusicMarkDetails'];
@@ -23,7 +24,11 @@ class App extends React.Component {
     return (
       <ApolloProvider client={client}>
         <ThemeProvider>
-          <Navigations ref={nav => this.nav = nav}/>
+          <Navigations
+            ref={navigatorRef => {
+              NavigationService.setTopLevelNavigator(navigatorRef);
+            }}
+          />
           <Query query={GET_CURRENT_ROUTE_NAME}>
             {({ loading, error, data }) => {
               if (loading) return 'Loading...';
@@ -31,7 +36,7 @@ class App extends React.Component {
               const { currentRouteName } = data;
               return currentRouteName &&
                 allowedScreens.find(screen => screen === currentRouteName) ? (
-                <GlobalFooter navigation={this.nav}/>
+                <GlobalFooter />
               ) : null;
             }}
           </Query>

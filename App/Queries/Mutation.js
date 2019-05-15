@@ -41,14 +41,45 @@ export const CREATE_MUSIC_MARK = gql`
       musics: $musics
     ) {
       id
-      latitude
-      longitude
       title
       description
+      longitude
+      latitude
+      likedBy {
+        username
+      }
+      favouriteFor {
+        username
+      }
+      comments {
+        description
+        author {
+          username
+        }
+        createdAt
+      }
+      user {
+        username
+        musicMarks {
+          id
+        }
+      }
       musics {
         id
         title
+        trackId
+        trackService
+        user {
+          username
+        }
+        artwork
+        artist
+        genre
+        duration
+        trackCreatedAt
+        createdAt
       }
+      createdAt
     }
   }
 `;

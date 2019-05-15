@@ -12,6 +12,7 @@ import {
   UPDATE_CURRENT_STACK,
   UPDATE_SELECTED_SONGS,
   UPDATE_CURRENT_ROUTE_NAME,
+  UPDATE_PLAYLIST_MODE
 } from '../../Queries/CacheQueries';
 import { compose, graphql } from 'react-apollo';
 import { withApollo } from 'react-apollo';
@@ -45,6 +46,10 @@ class ChooseMusic extends React.Component {
 
   componentWillUnmount(): void {
     this.props.client.mutate({ mutation: CLEAR_SELECTED_SONGS });
+    this.props.client.mutate({
+      mutation: UPDATE_PLAYLIST_MODE,
+      variables: { playlistMode: false },
+    });
   }
 
   componentWillMount() {
@@ -158,6 +163,7 @@ class ChooseMusic extends React.Component {
   );
 
   _updateStack = music => {
+
     this.props.client.mutate({
       mutation: UPDATE_CURRENT_STACK,
       variables: { music },

@@ -48,7 +48,7 @@ const mainResolvers = {
 
     const { currentSong } = cache.readQuery({ query: GET_CURRENT_SONG });
 
-    if (currentSong.playlist) {
+    if (currentSong && currentSong.playlist) {
       client.writeQuery({
         query: GET_CURRENT_SONGS,
         data: { currentSongs: [] },

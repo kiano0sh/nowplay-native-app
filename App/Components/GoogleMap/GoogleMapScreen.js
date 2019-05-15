@@ -74,6 +74,26 @@ class GoogleMapScreen extends React.Component {
     });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const deletedMusicMarkId = this.props.navigation.getParam(
+      'deletedMusicMarkId',
+      null,
+    );
+    if (
+      deletedMusicMarkId !==
+      prevProps.navigation.getParam('deletedMusicMarkId', null)
+    ) {
+      let marksAround = this.state.marksAround;
+      const indexOfDeletedMusicMark = marksAround.findIndex(
+        item => item.id === deletedMusicMarkId,
+      );
+      marksAround.splice(indexOfDeletedMusicMark, 1);
+      this.setState({
+        marksAround,
+      });
+    }
+  }
+
   componentWillMount() {
     this.props.navigation.addListener('willFocus', () => {
       this.props.client.mutate({
@@ -183,6 +203,7 @@ class GoogleMapScreen extends React.Component {
 
   render() {
     const { currentLocation, marksAround, region } = this.state;
+
     return (
       <View style={{ flex: 1 }}>
         <MapView
@@ -213,7 +234,11 @@ class GoogleMapScreen extends React.Component {
                 this.props.navigation.navigate('ChooseMusic');
               }}
             >
-              <Icon type={'material-community'} name={'library-music'} size={30} />
+              <Icon
+                type={'material-community'}
+                name={'library-music'}
+                size={30}
+              />
             </Marker>
           )} */}
           {marksAround.length

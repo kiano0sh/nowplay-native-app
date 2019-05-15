@@ -7,7 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import { Card, ListItem, Button, Icon } from 'react-native-elements';
+import { Card, ListItem, Button, Icon, Overlay } from 'react-native-elements';
 import { graphql, compose, Mutation, withApollo } from 'react-apollo';
 import {
   GET_CURRENT_PLAYLIST,
@@ -20,6 +20,12 @@ import { DELETE_MUSIC_MARK } from '../../Queries/Mutation';
 import { getMusicDetails } from '../../API/Soundcloud/soundcloudHelper';
 
 class MusicMarkDetails extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isVisible: false,
+    };
+  }
   static navigationOptions = ({ navigation }) => {
     return {
       title: 'Playlist',
@@ -32,19 +38,7 @@ class MusicMarkDetails extends Component {
       },
       headerRight: (
         <TouchableOpacity
-          onPress={() =>
-            navigation
-              .getParam('client')
-              .mutate({
-                mutation: DELETE_MUSIC_MARK,
-                variables: { musicMarkId: navigation.getParam('musicMarkId') },
-                fetchPolicy: 'no-cache',
-              })
-              .then(data => {
-                console.log(d);
-              })
-              .catch(err => console.log(err))
-          }
+          onPress={() => navigation.getParam('toggleIsVisible')()}
           style={[{ paddingHorizontal: 15 }]}
         >
           <Icon type={'font-awesome'} name={'trash'} color={'#fff'} size={30} />
@@ -65,14 +59,36 @@ class MusicMarkDetails extends Component {
   }
 
   componentDidMount() {
-    const {
-      currentPlaylistQuery: { currentPlaylist },
-    } = this.props;
     this.props.navigation.setParams({
-      musicMarkId: currentPlaylist.id,
-      client: this.props.client,
+      toggleIsVisible: this._toggleIsVisible,
     });
   }
+
+  _toggleIsVisible = () => {
+    this.setState({ isVisible: true });
+  };
+
+  _onDeletePlaylistPress = () => {
+    const {
+      currentPlaylistQuery: {
+        currentPlaylist: { id },
+      },
+    } = this.props;
+    this.props.client
+      .mutate({
+        mutation: DELETE_MUSIC_MARK,
+        variables: { musicMarkId: id },
+        fetchPolicy: 'no-cache',
+      })
+      .then(({ data: { deleteMusicMark: { id } } }) => {
+        this.setState({ isVisible: false });
+        return this.props.navigation.navigate('Home', { deletedMusicMarkId: id });
+      })
+      .catch(err => {
+        this.setState({ isVisible: false });
+        return alert(err);
+      });
+  };
 
   _updateStack = index => {
     console.log(index);
@@ -124,6 +140,25 @@ class MusicMarkDetails extends Component {
     } = this.props;
     return (
       <View style={{ backgroundColor: '#121619', flex: 1 }}>
+        <Overlay
+          isVisible={this.state.isVisible}
+          width="70%"
+          height="20%"
+          windowBackgroundColor="rgba(0, 0, 0, .5)"
+          onBackdropPress={() => this.setState({ isVisible: false })}
+        >
+          <View style={styles.deletePlaylistContainer}>
+            <Text style={styles.deletePlaylistWarning}>
+              Are you sure you want to delete this playlist ?
+            </Text>
+            <Button
+              title={'Delete'}
+              buttonStyle={styles.deletePlaylistButton}
+              titleStyle={{ color: '#fff' }}
+              onPress={this._onDeletePlaylistPress}
+            />
+          </View>
+        </Overlay>
         <Button
           title={'Add your favourite songs here!'}
           onPress={() => {
@@ -143,7 +178,6 @@ class MusicMarkDetails extends Component {
           raised
           buttonStyle={styles.buttonStyle}
         />
-
         <FlatList
           keyExtractor={this._keyExtractor}
           data={musics}
@@ -168,6 +202,20 @@ styles = StyleSheet.create({
   },
   soundcloudText: {
     color: 'white',
+  },
+  deletePlaylistContainer: {
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  deletePlaylistWarning: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 17,
+    marginBottom: '5%',
+  },
+  deletePlaylistButton: {
+    backgroundColor: '#ed5e68',
   },
 });
 

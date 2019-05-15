@@ -17,6 +17,7 @@ import {
   GET_CURRENT_PLAYLIST,
   SET_CURRENT_PLAYLIST,
   UPDATE_CURRENT_PLAYLIST,
+  MARK_DETAIL_BY_ID,
 } from '../../Queries/CacheQueries';
 import {
   CREATE_MUSIC_MARK,
@@ -25,6 +26,7 @@ import {
 } from '../../Queries/Mutation';
 import { graphql, compose, Mutation, withApollo } from 'react-apollo';
 import Video from 'react-native-video';
+import NavigationService from '../../NavigationService';
 
 class GlobalFooter extends React.Component {
   _playSong = () => {
@@ -59,6 +61,7 @@ class GlobalFooter extends React.Component {
   };
 
   _addMusicMark() {
+    console.log('ima here');
     const {
       currentMarkLocationQuery: { currentMarkLocation },
       selectedSongsQuery: { selectedSongs },
@@ -83,6 +86,9 @@ class GlobalFooter extends React.Component {
           }),
         },
       })
+      .then(({ data: { createMusicMark } }) =>
+        this.getMusicMarkDetails(createMusicMark),
+      )
       .catch(err => alert(err));
   }
 
@@ -123,12 +129,22 @@ class GlobalFooter extends React.Component {
         // TODO better solution
         this.props.client.mutate({
           mutation: SET_CURRENT_PLAYLIST,
-          variables: {currentPlaylist: addMusic}
+          variables: { currentPlaylist: addMusic },
         });
-        return this.props.navigation._navigation.navigate('MusicMarkDetails');
+        return NavigationService.navigate('MusicMarkDetails');
       })
       .catch(err => alert(err));
   }
+
+  getMusicMarkDetails = currentPlaylist => {
+    this.props.client
+      .mutate({
+        mutation: SET_CURRENT_PLAYLIST,
+        variables: { currentPlaylist },
+      })
+      .then(res => NavigationService.replace('MusicMarkDetails'))
+      .catch(err => alert(err));
+  };
 
   // shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean {
   //     const {playStatusQuery, currentSongQuery, selectedSongsQuery} = this.props;
