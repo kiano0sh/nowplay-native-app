@@ -24,9 +24,11 @@
     "react-native-gesture-handler": "^1.1.0",
     "react-native-maps": "https://github.com/react-native-community/react-native-maps/archive/v0.24-rc1.tar.gz",
     "react-native-music-control": "^0.9.9",
+    "react-native-paper": "^2.15.2",
     "react-native-vector-icons": "^6.4.2",
     "react-native-video": "^4.4.1",
     "react-navigation": "^3.6.1",
+    "react-navigation-material-bottom-tabs": "^1.0.0",
     "react-redux": "^6.0.1",
     "redux": "^4.0.1",
     "yup": "^0.27.0"

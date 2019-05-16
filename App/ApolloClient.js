@@ -80,7 +80,3 @@ export const updateHeaders = () =>
       Authorization: `Bearer ${cache.readQuery({ query: GET_TOKEN }).token}`,
     },
   });
-
-// waitOnCache.then(() => {
-//     updateHeaders()
-// });

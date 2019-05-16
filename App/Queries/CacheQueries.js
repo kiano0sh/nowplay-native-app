@@ -8,11 +8,11 @@ export const GET_TOKEN = gql`
   }
 `;
 
-export const GET_CURRENT_ROUTE_NAME = gql`
-  {
-    currentRouteName @client
-  }
-`;
+// export const GET_CURRENT_ROUTE_NAME = gql`
+//   {
+//     currentRouteName @client
+//   }
+// `;
 
 export const GET_PLAY_STATUS = gql`
   {
@@ -98,11 +98,11 @@ export const GET_PLAYLIST_MODE = gql`
 
 // MUTATIONS
 
-export const UPDATE_CURRENT_ROUTE_NAME = gql`
-  mutation updateCurrentRouteName($currentRouteName: String!) {
-    updateCurrentRouteName(currentRouteName: $currentRouteName) @client
-  }
-`;
+// export const UPDATE_CURRENT_ROUTE_NAME = gql`
+//   mutation updateCurrentRouteName($currentRouteName: String!) {
+//     updateCurrentRouteName(currentRouteName: $currentRouteName) @client
+//   }
+// `;
 
 export const UPDATE_CURRENT_STACK = gql`
   mutation updateCurrentStack($music: Object!) {

@@ -11,13 +11,15 @@ import { Card, ListItem, Button, Icon, Overlay } from 'react-native-elements';
 import { graphql, compose, Mutation, withApollo } from 'react-apollo';
 import {
   GET_CURRENT_PLAYLIST,
-  UPDATE_CURRENT_ROUTE_NAME,
+  // UPDATE_CURRENT_ROUTE_NAME,
   UPDATE_CURRENT_PLAYLIST_SONG,
   PLAY_CURRENT_SONG,
   UPDATE_PLAYLIST_MODE,
 } from '../../Queries/CacheQueries';
 import { DELETE_MUSIC_MARK } from '../../Queries/Mutation';
 import { getMusicDetails } from '../../API/Soundcloud/soundcloudHelper';
+import GlobalFooter from '../MusicPlayer/GlobalFooter';
+import { ScrollView } from 'react-native-gesture-handler';
 
 class MusicMarkDetails extends Component {
   constructor(props) {
@@ -47,17 +49,6 @@ class MusicMarkDetails extends Component {
     };
   };
 
-  componentWillMount() {
-    this.props.navigation.addListener('willFocus', () => {
-      this.props.client.mutate({
-        mutation: UPDATE_CURRENT_ROUTE_NAME,
-        variables: {
-          currentRouteName: this.props.navigation.state.routeName,
-        },
-      });
-    });
-  }
-
   componentDidMount() {
     this.props.navigation.setParams({
       toggleIsVisible: this._toggleIsVisible,
@@ -82,7 +73,9 @@ class MusicMarkDetails extends Component {
       })
       .then(({ data: { deleteMusicMark: { id } } }) => {
         this.setState({ isVisible: false });
-        return this.props.navigation.navigate('Home', { deletedMusicMarkId: id });
+        return this.props.navigation.navigate('GoogleMapScreen', {
+          deletedMusicMarkId: id,
+        });
       })
       .catch(err => {
         this.setState({ isVisible: false });
@@ -140,25 +133,6 @@ class MusicMarkDetails extends Component {
     } = this.props;
     return (
       <View style={{ backgroundColor: '#121619', flex: 1 }}>
-        <Overlay
-          isVisible={this.state.isVisible}
-          width="70%"
-          height="20%"
-          windowBackgroundColor="rgba(0, 0, 0, .5)"
-          onBackdropPress={() => this.setState({ isVisible: false })}
-        >
-          <View style={styles.deletePlaylistContainer}>
-            <Text style={styles.deletePlaylistWarning}>
-              Are you sure you want to delete this playlist ?
-            </Text>
-            <Button
-              title={'Delete'}
-              buttonStyle={styles.deletePlaylistButton}
-              titleStyle={{ color: '#fff' }}
-              onPress={this._onDeletePlaylistPress}
-            />
-          </View>
-        </Overlay>
         <Button
           title={'Add your favourite songs here!'}
           onPress={() => {
@@ -178,11 +152,33 @@ class MusicMarkDetails extends Component {
           raised
           buttonStyle={styles.buttonStyle}
         />
-        <FlatList
-          keyExtractor={this._keyExtractor}
-          data={musics}
-          renderItem={this.renderItem}
-        />
+        <Overlay
+          isVisible={this.state.isVisible}
+          width="70%"
+          height="20%"
+          windowBackgroundColor="rgba(0, 0, 0, .5)"
+          onBackdropPress={() => this.setState({ isVisible: false })}
+        >
+          <View style={styles.deletePlaylistContainer}>
+            <Text style={styles.deletePlaylistWarning}>
+              Are you sure you want to delete this playlist ?
+            </Text>
+            <Button
+              title={'Delete'}
+              buttonStyle={styles.deletePlaylistButton}
+              titleStyle={{ color: '#fff' }}
+              onPress={this._onDeletePlaylistPress}
+            />
+          </View>
+        </Overlay>
+        <ScrollView>
+          <FlatList
+            keyExtractor={this._keyExtractor}
+            data={musics}
+            renderItem={this.renderItem}
+          />
+        </ScrollView>
+        <GlobalFooter />
       </View>
     );
   }

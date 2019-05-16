@@ -6,20 +6,19 @@ import {
   TextInput,
   ScrollView,
   Image,
-  SafeAreView,
 } from 'react-native';
 import {
   UPDATE_CURRENT_MARK_LOCATION,
-  UPDATE_CURRENT_ROUTE_NAME,
+  // UPDATE_CURRENT_ROUTE_NAME,
   SET_CURRENT_PLAYLIST,
 } from '../../Queries/CacheQueries';
 import { MARKS_AROUND, MARK_DETAIL_BY_ID } from '../../Queries/Qurey';
 import { Button, SearchBar, Text, Icon } from 'react-native-elements';
 import MapView from 'react-native-maps';
-import { Marker, Circle } from 'react-native-maps';
+import { Marker, Callout } from 'react-native-maps';
 import { PermissionsAndroid } from 'react-native';
-import { UrlTile, Callout } from 'react-native-maps';
 import { withApollo } from 'react-apollo';
+import GlobalFooter from '../MusicPlayer/GlobalFooter';
 
 const { width, height } = Dimensions.get('window');
 
@@ -79,6 +78,7 @@ class GoogleMapScreen extends React.Component {
       'deletedMusicMarkId',
       null,
     );
+    // removing mark from state and ui
     if (
       deletedMusicMarkId !==
       prevProps.navigation.getParam('deletedMusicMarkId', null)
@@ -92,17 +92,6 @@ class GoogleMapScreen extends React.Component {
         marksAround,
       });
     }
-  }
-
-  componentWillMount() {
-    this.props.navigation.addListener('willFocus', () => {
-      this.props.client.mutate({
-        mutation: UPDATE_CURRENT_ROUTE_NAME,
-        variables: {
-          currentRouteName: this.props.navigation.state.routeName,
-        },
-      });
-    });
   }
 
   requestLocationPermission = async () => {
@@ -203,7 +192,7 @@ class GoogleMapScreen extends React.Component {
 
   render() {
     const { currentLocation, marksAround, region } = this.state;
-
+    const { addMode } = this.props;
     return (
       <View style={{ flex: 1 }}>
         <MapView
@@ -250,7 +239,7 @@ class GoogleMapScreen extends React.Component {
                       latitude: mark.latitude,
                       longitude: mark.longitude,
                     }}
-                    onPress={() => this.getMusicMarkDetails(mark.id)}
+                    onPress={() => !addMode ? this.getMusicMarkDetails(mark.id) : null}
                   >
                     <Icon
                       type={'material-community'}
@@ -270,6 +259,7 @@ class GoogleMapScreen extends React.Component {
             />
           </View>
         </Callout>
+        <GlobalFooter />
       </View>
     );
   }

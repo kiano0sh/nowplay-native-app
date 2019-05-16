@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, FlatList, Button } from 'react-native';
+import { StyleSheet, View, FlatList, Button, ScrollView } from 'react-native';
 import { SearchBar, ListItem, Text, Icon } from 'react-native-elements';
 import { soundcloudSearch } from '../../API/Soundcloud/soundcloudHelper';
 import {
@@ -11,12 +11,13 @@ import {
   PLAY_CURRENT_SONG,
   UPDATE_CURRENT_STACK,
   UPDATE_SELECTED_SONGS,
-  UPDATE_CURRENT_ROUTE_NAME,
-  UPDATE_PLAYLIST_MODE
+  // UPDATE_CURRENT_ROUTE_NAME,
+  UPDATE_PLAYLIST_MODE,
 } from '../../Queries/CacheQueries';
 import { compose, graphql } from 'react-apollo';
 import { withApollo } from 'react-apollo';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import GlobalFooter from '../MusicPlayer/GlobalFooter';
 
 class ChooseMusic extends React.Component {
   constructor(props, context) {
@@ -49,17 +50,6 @@ class ChooseMusic extends React.Component {
     this.props.client.mutate({
       mutation: UPDATE_PLAYLIST_MODE,
       variables: { playlistMode: false },
-    });
-  }
-
-  componentWillMount() {
-    this.props.navigation.addListener('willFocus', () => {
-      this.props.client.mutate({
-        mutation: UPDATE_CURRENT_ROUTE_NAME,
-        variables: {
-          currentRouteName: this.props.navigation.state.routeName,
-        },
-      });
     });
   }
 
@@ -163,7 +153,6 @@ class ChooseMusic extends React.Component {
   );
 
   _updateStack = music => {
-
     this.props.client.mutate({
       mutation: UPDATE_CURRENT_STACK,
       variables: { music },
@@ -233,19 +222,21 @@ class ChooseMusic extends React.Component {
             })
           }
         />
-
-        {!!collection && !!collection.length && (
-          <FlatList
-            keyExtractor={this._keyExtractor}
-            data={collection}
-            renderItem={this.renderItem}
-            extraData={this.state}
-            onEndReached={() => this._nextPage()}
-            // ListFooterComponent={
-            //      <Button title={'title'} onPress={() => {console.log(this.state);return this._nextPage()}}/>
-            // }
-          />
-        )}
+        <ScrollView>
+          {!!collection && !!collection.length && (
+            <FlatList
+              keyExtractor={this._keyExtractor}
+              data={collection}
+              renderItem={this.renderItem}
+              extraData={this.state}
+              onEndReached={() => this._nextPage()}
+              // ListFooterComponent={
+              //      <Button title={'title'} onPress={() => {console.log(this.state);return this._nextPage()}}/>
+              // }
+            />
+          )}
+        </ScrollView>
+        <GlobalFooter />
         {/*<Button*/}
         {/*    title={'Show More'}*/}
         {/*    onPress={() => this._nextPage()}*/}

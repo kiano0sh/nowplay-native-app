@@ -9,8 +9,6 @@ import {
   PLAY_CURRENT_SONG,
   PLAY_NEXT_SONG,
   PLAY_PREVIOUS_SONG,
-  SET_CURRENT_TIME,
-  UPDATE_CURRENT_SONG_REF,
   GET_SELECTED_SONGS,
   GET_CURRENT_MARK_LOCATION,
   GET_PLAYLIST_MODE,
@@ -25,7 +23,6 @@ import {
   ADD_MUSIC,
 } from '../../Queries/Mutation';
 import { graphql, compose, Mutation, withApollo } from 'react-apollo';
-import Video from 'react-native-video';
 import NavigationService from '../../NavigationService';
 
 class GlobalFooter extends React.Component {
@@ -43,21 +40,6 @@ class GlobalFooter extends React.Component {
 
   _playPreviousSong = () => {
     this.props.client.mutate({ mutation: PLAY_PREVIOUS_SONG });
-  };
-
-  _setCurrentTime = ({ currentTime }) => {
-    this.props.client.mutate({
-      mutation: SET_CURRENT_TIME,
-      variables: { currentTime },
-    });
-  };
-
-  _updateCurrentSongRef = () => {
-    this.props.client.mutate({
-      mutation: UPDATE_CURRENT_SONG_REF,
-      variables: { currentSongRef: this.currentSongRef },
-    });
-    // console.log(this.props.client.readQuery({query: GET_CURRENT_SONG_REF}))
   };
 
   _addMusicMark() {
@@ -156,8 +138,8 @@ class GlobalFooter extends React.Component {
 
   render() {
     const {
-      playStatusQuery,
-      currentSongQuery,
+      playStatusQuery: { playStatus },
+      currentSongQuery: { currentSong },
       playlistModeQuery: { playlistMode },
       selectedSongsQuery: { selectedSongs },
     } = this.props;
@@ -200,7 +182,7 @@ class GlobalFooter extends React.Component {
                 color={'white'}
               />
             </TouchableOpacity>
-            {playStatusQuery.playStatus ? (
+            {playStatus ? (
               <TouchableOpacity onPress={this._pauseSong}>
                 <Icon
                   type={'foundation'}
@@ -230,31 +212,10 @@ class GlobalFooter extends React.Component {
                 color={'white'}
               />
             </TouchableOpacity>
-            {currentSongQuery.currentSong ? (
-              <Video
-                source={{ uri: currentSongQuery.currentSong.streamUrl }}
-                ref={(ref: Video) => {
-                  this.currentSongRef = ref;
-                }}
-                onLoad={this._updateCurrentSongRef}
-                audioOnly={true}
-                volume={1.0}
-                muted={false}
-                paused={!playStatusQuery.playStatus}
-                playInBackground={true}
-                playWhenInactive={true}
-                onEnd={this._playNextSong}
-                onProgress={this._setCurrentTime}
-                resizeMode="cover"
-                repeat={false}
-              />
-            ) : null}
           </View>
           <View style={styles.titleContainer}>
             <Text style={styles.titleStyles} numberOfLines={1}>
-              {currentSongQuery.currentSong
-                ? currentSongQuery.currentSong.title
-                : 'No Music Is Selected Yet!'}
+              {currentSong ? currentSong.title : 'No Music Is Selected Yet!'}
             </Text>
           </View>
         </View>

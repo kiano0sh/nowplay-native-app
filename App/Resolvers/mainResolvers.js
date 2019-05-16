@@ -9,7 +9,7 @@ import {
   GET_CURRENT_TIME,
   GET_CURRENT_MARK_LOCATION,
   GET_SELECTED_SONGS,
-  GET_CURRENT_ROUTE_NAME,
+  // GET_CURRENT_ROUTE_NAME,
   GET_CURRENT_PLAYLIST,
   GET_PLAYLIST_MODE,
 } from '../Queries/CacheQueries';
@@ -35,14 +35,14 @@ const mainResolvers = {
     });
     return null;
   },
-  updateCurrentRouteName: (root, args, { cache, client }) => {
-    const { currentRouteName } = args;
-    client.writeQuery({
-      query: GET_CURRENT_ROUTE_NAME,
-      data: { currentRouteName },
-    });
-    return null;
-  },
+  // updateCurrentRouteName: (root, args, { cache, client }) => {
+  //   const { currentRouteName } = args;
+  //   client.writeQuery({
+  //     query: GET_CURRENT_ROUTE_NAME,
+  //     data: { currentRouteName },
+  //   });
+  //   return null;
+  // },
   updateCurrentStack: (root, args, { cache, client }) => {
     let { music } = args;
 
