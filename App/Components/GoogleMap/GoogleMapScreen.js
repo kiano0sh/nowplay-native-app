@@ -6,6 +6,7 @@ import {
   TextInput,
   ScrollView,
   Image,
+  TouchableOpacity,
 } from 'react-native';
 import {
   UPDATE_CURRENT_MARK_LOCATION,
@@ -43,6 +44,12 @@ class GoogleMapScreen extends React.Component {
         latitudeDelta: LATITUDE_DELTA,
         longitudeDelta: LONGITUDE_DELTA,
       },
+      markerCoordinate: {
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA,
+      },
       currentLocation: {
         coords: {
           latitude: LATITUDE,
@@ -52,26 +59,11 @@ class GoogleMapScreen extends React.Component {
       },
       search: '',
       marksAround: [],
+      marginBottom: 1,
     };
   }
 
-  componentDidMount(): void {
-    PermissionsAndroid.check(
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-    ).then(result => {
-      if (result) {
-        this.getCurrentLocation();
-      } else {
-        this.requestLocationPermission().then(isGranted => {
-          if (isGranted) {
-            this.getCurrentLocation();
-          } else {
-            console.log('Not granted!');
-          }
-        });
-      }
-    });
-  }
+  componentDidMount(): void {}
 
   componentDidUpdate(prevProps, prevState) {
     const deletedMusicMarkId = this.props.navigation.getParam(
@@ -95,26 +87,22 @@ class GoogleMapScreen extends React.Component {
   }
 
   requestLocationPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Nowplay Location Permission',
-          message:
-            'Nowplay needs access to your location ' +
-            'so you can find your current location easily.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (err) {
-      console.warn(err);
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      {
+        title: 'Nowplay Location Permission',
+        message:
+          'Nowplay needs access to your location ' +
+          'so you can find your current location easily.',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      },
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      return true;
+    } else {
+      return false;
     }
   };
 
@@ -123,11 +111,6 @@ class GoogleMapScreen extends React.Component {
       position => {
         this.setState((state, props) => {
           return {
-            region: {
-              ...this.state.region,
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            },
             currentLocation: {
               coords: {
                 latitude: position.coords.latitude,
@@ -137,6 +120,17 @@ class GoogleMapScreen extends React.Component {
             },
           };
         });
+        this._mapView.animateCamera(
+          {
+            center: {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            },
+          },
+          {
+            duration: 1000,
+          },
+        );
       },
       error => console.log(error),
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
@@ -190,22 +184,64 @@ class GoogleMapScreen extends React.Component {
       .catch(err => console.log(err));
   };
 
+  _onRegionChange = newRegion => {
+    let { longitude, longitudeDelta, latitude, latitudeDelta } = newRegion;
+    this.setState({
+      markerCoordinate: {
+        longitude,
+        longitudeDelta,
+        latitude,
+        latitudeDelta,
+      },
+    });
+  };
+
+  _onMapReady = () => {
+    PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    ).then(result => {
+      if (result) {
+        this.setState({ marginBottom: 0 });
+      } else {
+        this.requestLocationPermission().then(isGranted => {
+          if (isGranted) {
+            this.setState({ marginBottom: 0 });
+          } else {
+            console.log('Not granted!');
+          }
+        });
+      }
+    });
+  };
+
   render() {
-    const { currentLocation, marksAround, region } = this.state;
+    const {
+      currentLocation,
+      marksAround,
+      region,
+      markerCoordinate,
+    } = this.state;
+    console.log(markerCoordinate);
+
     const { addMode } = this.props;
     return (
       <View style={{ flex: 1 }}>
         <MapView
-          region={region}
-          style={styles.map}
+          initialRegion={region}
+          style={{ flex: 1, marginBottom: this.state.marginBottom }}
+          onMapReady={this._onMapReady}
           // customMapStyle={CustomMapView}
           scrollEnabled={true}
           zoomEnabled={true}
           pitchEnabled={true}
           rotateEnabled={true}
           showsUserLocation={true}
-          followsUserLocation={true}
           onRegionChangeComplete={this.getOtherMarks}
+          showsMyLocationButton={false}
+          onRegionChange={this._onRegionChange}
+          ref={mapView => {
+            this._mapView = mapView;
+          }}
         >
           {/* {currentLocation && (
             <Marker
@@ -230,16 +266,28 @@ class GoogleMapScreen extends React.Component {
               />
             </Marker>
           )} */}
+          {addMode && (
+            <Marker
+              coordinate={{
+                latitude: markerCoordinate.latitude,
+                longitude: markerCoordinate.longitude,
+                latitudeDelta: markerCoordinate.latitudeDelta,
+                longitudeDelta: markerCoordinate.longitudeDelta,
+              }}
+            />
+          )}
           {marksAround.length
             ? marksAround.map((mark, index) => {
                 return (
                   <Marker
-                    key={index}
+                    key={mark.id}
                     coordinate={{
                       latitude: mark.latitude,
                       longitude: mark.longitude,
                     }}
-                    onPress={() => !addMode ? this.getMusicMarkDetails(mark.id) : null}
+                    onPress={() =>
+                      !addMode ? this.getMusicMarkDetails(mark.id) : null
+                    }
                   >
                     <Icon
                       type={'material-community'}
@@ -258,6 +306,19 @@ class GoogleMapScreen extends React.Component {
               placeholder={'Search a place'}
             />
           </View>
+          <TouchableOpacity
+            style={styles.myLocationButton}
+            onPress={() => {
+              this.getCurrentLocation();
+            }}
+          >
+            <Icon
+              name="target-two"
+              type={'foundation'}
+              size={28}
+              color={'rgba(0,0,0,0.5)'}
+            />
+          </TouchableOpacity>
         </Callout>
         <GlobalFooter />
       </View>
@@ -276,9 +337,6 @@ const styles = StyleSheet.create({
     // marginTop: '20%',
     // position: 'absolute'
   },
-  map: {
-    flex: 1,
-  },
   calloutView: {
     flexDirection: 'row',
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
@@ -295,6 +353,17 @@ const styles = StyleSheet.create({
     marginRight: 10,
     height: 40,
     borderWidth: 0.0,
+  },
+  myLocationButton: {
+    backgroundColor: '#fff',
+    position: 'absolute',
+    bottom: 3,
+    right: 15,
+    padding: 5,
+    elevation: 3,
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    justifyContent: 'center',
   },
 });
 

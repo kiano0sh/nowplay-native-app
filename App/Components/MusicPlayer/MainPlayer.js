@@ -23,7 +23,6 @@ export class MainPlayer extends Component {
       mutation: UPDATE_CURRENT_SONG_REF,
       variables: { currentSongRef: this.currentSongRef },
     });
-    // console.log(this.props.client.readQuery({query: GET_CURRENT_SONG_REF}))
   };
 
   _playNextSong = () => {

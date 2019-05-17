@@ -13,12 +13,8 @@ import { ThemeProvider } from 'react-native-elements';
 import Navigations from './Navigations';
 import GlobalFooter from './Components/MusicPlayer/GlobalFooter';
 import MainPlayer from './Components/MusicPlayer/MainPlayer';
-// import { GET_CURRENT_ROUTE_NAME } from './Queries/CacheQueries';
 import { Text } from 'react-native';
 import NavigationService from './NavigationService';
-
-// Allowed screens for GlobalFooter
-// const allowedScreens = ['GoogleMapScreen', 'ChooseMusic', 'MusicMarkDetails'];
 
 class App extends React.Component {
   render() {
