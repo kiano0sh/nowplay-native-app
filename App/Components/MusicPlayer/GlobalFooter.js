@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Keyboard } from 'react-native';
 import { Text, Icon, Overlay } from 'react-native-elements';
 import {
   GET_PLAY_STATUS,
@@ -16,6 +16,7 @@ import {
   SET_CURRENT_PLAYLIST,
   UPDATE_CURRENT_PLAYLIST,
   MARK_DETAIL_BY_ID,
+  UPDATE_ADDED_MARK,
 } from '../../Queries/CacheQueries';
 import {
   CREATE_MUSIC_MARK,
@@ -26,6 +27,38 @@ import { graphql, compose, Mutation, withApollo } from 'react-apollo';
 import NavigationService from '../../NavigationService';
 
 class GlobalFooter extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      footerVisible: true,
+    };
+  }
+
+  // TODO maybe there is a better way than adding listener over and over after component did mount
+  componentWillMount() {
+    this.keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      this._keyboardDidShow,
+    );
+    this.keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      this._keyboardDidHide,
+    );
+  }
+
+  componentWillUnmount() {
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
+  }
+
+  _keyboardDidShow = () => {
+    this.setState({ footerVisible: false });
+  };
+
+  _keyboardDidHide = () => {
+    this.setState({ footerVisible: true });
+  };
+
   _playSong = () => {
     this.props.client.mutate({ mutation: PLAY_CURRENT_SONG });
   };
@@ -68,9 +101,19 @@ class GlobalFooter extends React.Component {
           }),
         },
       })
-      .then(({ data: { createMusicMark } }) =>
-        this.getMusicMarkDetails(createMusicMark),
-      )
+      .then(({ data: { createMusicMark } }) => {
+        this.getMusicMarkDetails(createMusicMark);
+        this.props.client.mutate({
+          mutation: UPDATE_ADDED_MARK,
+          variables: {
+            addedMark: {
+              id: createMusicMark.id,
+              latitude: createMusicMark.latitude,
+              longitude: createMusicMark.longitude,
+            },
+          },
+        });
+      })
       .catch(err => alert(err));
   }
 
@@ -128,22 +171,13 @@ class GlobalFooter extends React.Component {
       .catch(err => alert(err));
   };
 
-  // shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean {
-  //     const {playStatusQuery, currentSongQuery, selectedSongsQuery} = this.props;
-  //     const playStatus = playStatusQuery.playStatus !== nextProps.playStatusQuery.playStatus;
-  //     const currentSong = currentSongQuery.currentSong !== nextProps.currentSongQuery.currentSong;
-  //     const selectedSongs = selectedSongsQuery.selectedSongs !== nextProps.selectedSongsQuery.selectedSongs;
-  //     return playStatus || currentSong || selectedSongs
-  // }
-
-  render() {
+  renderFooter() {
     const {
       playStatusQuery: { playStatus },
       currentSongQuery: { currentSong },
       playlistModeQuery: { playlistMode },
       selectedSongsQuery: { selectedSongs },
     } = this.props;
-
     return (
       <View style={{ marginBottom: -4 }}>
         {selectedSongs.length ? (
@@ -221,6 +255,10 @@ class GlobalFooter extends React.Component {
         </View>
       </View>
     );
+  }
+
+  render() {
+    return this.state.footerVisible ? this.renderFooter() : null;
   }
 }
 

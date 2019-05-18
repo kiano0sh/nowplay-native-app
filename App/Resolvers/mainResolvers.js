@@ -9,9 +9,9 @@ import {
   GET_CURRENT_TIME,
   GET_CURRENT_MARK_LOCATION,
   GET_SELECTED_SONGS,
-  // GET_CURRENT_ROUTE_NAME,
   GET_CURRENT_PLAYLIST,
   GET_PLAYLIST_MODE,
+  GET_ADDED_MARK,
 } from '../Queries/CacheQueries';
 import { streamUrl, getStreamUrl } from '../API/Soundcloud/soundcloudHelper';
 import MusicControl from 'react-native-music-control';
@@ -309,9 +309,10 @@ const mainResolvers = {
   },
   updateCurrentPlaylistSong: (root, args, { client, cache }) => {
     const { index } = args;
-    const { currentPlaylist: {musics} } = cache.readQuery({ query: GET_CURRENT_PLAYLIST });
+    const {
+      currentPlaylist: { musics },
+    } = cache.readQuery({ query: GET_CURRENT_PLAYLIST });
     const { currentSong } = cache.readQuery({ query: GET_CURRENT_SONG });
-
 
     if (currentSong === null || !currentSong.playlist) {
       client.writeQuery({
@@ -334,6 +335,15 @@ const mainResolvers = {
       data: { playlistMode },
     });
     return null;
+  },
+  updateAddedMark: (root, args, { client }) => {
+    const { addedMark } = args;
+    client.writeQuery({
+      query: GET_ADDED_MARK,
+      data: { addedMark },
+    });
+    console.log(addedMark);
+
   },
 };
 

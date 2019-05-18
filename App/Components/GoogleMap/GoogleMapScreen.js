@@ -10,20 +10,20 @@ import {
 } from 'react-native';
 import {
   UPDATE_CURRENT_MARK_LOCATION,
-  // UPDATE_CURRENT_ROUTE_NAME,
   SET_CURRENT_PLAYLIST,
+  GET_ADDED_MARK,
 } from '../../Queries/CacheQueries';
 import { MARKS_AROUND, MARK_DETAIL_BY_ID } from '../../Queries/Qurey';
 import { Button, SearchBar, Text, Icon } from 'react-native-elements';
 import MapView from 'react-native-maps';
 import { Marker, Callout } from 'react-native-maps';
 import { PermissionsAndroid } from 'react-native';
-import { withApollo } from 'react-apollo';
+import { withApollo, compose, graphql } from 'react-apollo';
 import GlobalFooter from '../MusicPlayer/GlobalFooter';
 
 const { width, height } = Dimensions.get('window');
 
-const ASPECT_RATIO = width / height; //,
+const ASPECT_RATIO = width / height;
 // Tehran
 const LATITUDE = 35.6892;
 const LONGITUDE = 51.389;
@@ -44,12 +44,6 @@ class GoogleMapScreen extends React.Component {
         latitudeDelta: LATITUDE_DELTA,
         longitudeDelta: LONGITUDE_DELTA,
       },
-      markerCoordinate: {
-        latitude: LATITUDE,
-        longitude: LONGITUDE,
-        latitudeDelta: LATITUDE_DELTA,
-        longitudeDelta: LONGITUDE_DELTA,
-      },
       currentLocation: {
         coords: {
           latitude: LATITUDE,
@@ -63,18 +57,16 @@ class GoogleMapScreen extends React.Component {
     };
   }
 
-  componentDidMount(): void {}
-
   componentDidUpdate(prevProps, prevState) {
-    const deletedMusicMarkId = this.props.navigation.getParam(
-      'deletedMusicMarkId',
-      null,
-    );
     // removing mark from state and ui
     if (
-      deletedMusicMarkId !==
+      this.props.navigation.getParam('deletedMusicMarkId', null) !==
       prevProps.navigation.getParam('deletedMusicMarkId', null)
     ) {
+      const deletedMusicMarkId = this.props.navigation.getParam(
+        'deletedMusicMarkId',
+        null,
+      );
       let marksAround = this.state.marksAround;
       const indexOfDeletedMusicMark = marksAround.findIndex(
         item => item.id === deletedMusicMarkId,
@@ -82,6 +74,15 @@ class GoogleMapScreen extends React.Component {
       marksAround.splice(indexOfDeletedMusicMark, 1);
       this.setState({
         marksAround,
+      });
+    }
+    // add mark to state and ui
+    if (
+      this.props.addedMarkQuery.addedMark !== prevProps.addedMarkQuery.addedMark
+    ) {
+      const { addedMark } = this.props.addedMarkQuery;
+      this.setState({
+        marksAround: [...this.state.marksAround, addedMark],
       });
     }
   }
@@ -120,20 +121,20 @@ class GoogleMapScreen extends React.Component {
             },
           };
         });
-        this._mapView.animateCamera(
+        return this._mapView.setCamera(
           {
             center: {
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
             },
-          },
-          {
-            duration: 1000,
-          },
+          }
         );
       },
       error => console.log(error),
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+      {
+        enableHighAccuracy: false,
+        timeout: 20000,
+      },
     );
   };
 
@@ -143,15 +144,7 @@ class GoogleMapScreen extends React.Component {
   };
 
   getOtherMarks = newRegion => {
-    let { longitude, longitudeDelta, latitude, latitudeDelta } = newRegion;
-    this.setState({
-      region: {
-        longitude,
-        longitudeDelta,
-        latitude,
-        latitudeDelta,
-      },
-    });
+    let { longitude, latitude } = newRegion;
     this.props.client
       .query({
         query: MARKS_AROUND,
@@ -185,13 +178,9 @@ class GoogleMapScreen extends React.Component {
   };
 
   _onRegionChange = newRegion => {
-    let { longitude, longitudeDelta, latitude, latitudeDelta } = newRegion;
     this.setState({
-      markerCoordinate: {
-        longitude,
-        longitudeDelta,
-        latitude,
-        latitudeDelta,
+      region: {
+        ...newRegion,
       },
     });
   };
@@ -214,15 +203,23 @@ class GoogleMapScreen extends React.Component {
     });
   };
 
-  render() {
-    const {
-      currentLocation,
-      marksAround,
-      region,
-      markerCoordinate,
-    } = this.state;
-    console.log(markerCoordinate);
+  onMarkerPress = marker => {
+    console.log(marker.nativeEvent);
+    const { coordinate } = marker.nativeEvent;
+    this.props.client.mutate({
+      mutation: UPDATE_CURRENT_MARK_LOCATION,
+      variables: {
+        currentMarkLocation: {
+          longitude: coordinate.longitude,
+          latitude: coordinate.latitude,
+        },
+      },
+    });
+    this.props.navigation.navigate('ChooseMusic');
+  };
 
+  render() {
+    const { currentLocation, marksAround, region } = this.state;
     const { addMode } = this.props;
     return (
       <View style={{ flex: 1 }}>
@@ -236,44 +233,19 @@ class GoogleMapScreen extends React.Component {
           pitchEnabled={true}
           rotateEnabled={true}
           showsUserLocation={true}
+          followsUserLocation={true}
           onRegionChangeComplete={this.getOtherMarks}
           showsMyLocationButton={false}
-          onRegionChange={this._onRegionChange}
+          onRegionChange={addMode ? this._onRegionChange : null}
           ref={mapView => {
             this._mapView = mapView;
           }}
         >
-          {/* {currentLocation && (
-            <Marker
-              coordinate={currentLocation.coords}
-              onPress={e => {
-                this.props.client.mutate({
-                  mutation: UPDATE_CURRENT_MARK_LOCATION,
-                  variables: {
-                    currentMarkLocation: {
-                      longitude: e.nativeEvent.coordinate.longitude,
-                      latitude: e.nativeEvent.coordinate.latitude,
-                    },
-                  },
-                });
-                this.props.navigation.navigate('ChooseMusic');
-              }}
-            >
-              <Icon
-                type={'material-community'}
-                name={'library-music'}
-                size={30}
-              />
-            </Marker>
-          )} */}
           {addMode && (
             <Marker
-              coordinate={{
-                latitude: markerCoordinate.latitude,
-                longitude: markerCoordinate.longitude,
-                latitudeDelta: markerCoordinate.latitudeDelta,
-                longitudeDelta: markerCoordinate.longitudeDelta,
-              }}
+              coordinate={region}
+              onPress={this.onMarkerPress}
+              ref={addMark => (this.addMark = addMark)}
             />
           )}
           {marksAround.length
@@ -326,7 +298,13 @@ class GoogleMapScreen extends React.Component {
   }
 }
 
-export default withApollo(GoogleMapScreen);
+export default compose(
+  withApollo,
+  graphql(GET_ADDED_MARK, {
+    options: { fetchPolicy: 'cache-only' },
+    name: 'addedMarkQuery',
+  }),
+)(GoogleMapScreen);
 
 const styles = StyleSheet.create({
   containerStyle: {

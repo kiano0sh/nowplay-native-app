@@ -96,6 +96,12 @@ export const GET_PLAYLIST_MODE = gql`
   }
 `;
 
+export const GET_ADDED_MARK = gql`
+  {
+    addedMark @client
+  }
+`;
+
 // MUTATIONS
 
 // export const UPDATE_CURRENT_ROUTE_NAME = gql`
@@ -179,5 +185,11 @@ export const SET_CURRENT_PLAYLIST = gql`
 export const UPDATE_PLAYLIST_MODE = gql`
   mutation updatePlaylistMode($playlistMode: Boolean!) {
     updatePlaylistMode(playlistMode: $playlistMode) @client
+  }
+`;
+
+export const UPDATE_ADDED_MARK = gql`
+  mutation updateAddedMark($addedMark: Object!) {
+    updateAddedMark(addedMark: $addedMark) @client
   }
 `;

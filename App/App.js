@@ -21,7 +21,11 @@ class App extends React.Component {
     return (
       <ApolloProvider client={client}>
         <ThemeProvider>
-          <Navigations />
+          <Navigations
+            ref={navigatorRef => {
+              NavigationService.setTopLevelNavigator(navigatorRef);
+            }}
+          />
           <MainPlayer />
         </ThemeProvider>
       </ApolloProvider>

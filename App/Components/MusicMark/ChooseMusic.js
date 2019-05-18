@@ -11,7 +11,6 @@ import {
   PLAY_CURRENT_SONG,
   UPDATE_CURRENT_STACK,
   UPDATE_SELECTED_SONGS,
-  // UPDATE_CURRENT_ROUTE_NAME,
   UPDATE_PLAYLIST_MODE,
 } from '../../Queries/CacheQueries';
 import { compose, graphql } from 'react-apollo';
@@ -20,15 +19,14 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import GlobalFooter from '../MusicPlayer/GlobalFooter';
 
 class ChooseMusic extends React.Component {
-  constructor(props, context) {
+  constructor(props) {
     super(props);
     this.state = {
       search: '',
-      results: null,
+      nextPageExists: false,
       collection: [],
       loading: false,
       // TODO after pressing clear button while data is fetching an amount of data remains in state!
-      // clear: false,
       page: 0,
       selectedSongs: [],
     };
@@ -55,18 +53,16 @@ class ChooseMusic extends React.Component {
 
   // add selected track to state
   _selectSong(selectedSong) {
-    console.log(selectedSong);
     this.props.client.mutate({
       mutation: UPDATE_SELECTED_SONGS,
       variables: { selectedSong },
     });
   }
 
-  // find out about existence of item in our selectedSong
+  // find out about existence of item in our selectedSongs
   // TODO needs a better and faster way
   _isItemSelected(id) {
     const { selectedSongs } = this.props.selectedSongsQuery;
-
     if (selectedSongs && selectedSongs.find(item => item.id === id)) {
       return '#00c853';
     } else {
@@ -84,15 +80,13 @@ class ChooseMusic extends React.Component {
       });
       soundcloudSearch(search)
         .then(results => {
-          console.log(results);
           this.setState((state, props) => {
             return {
-              results,
+              nextPageExists: !!results.next_href,
               collection: results.collection,
               loading: false,
             };
           });
-          // .catch(error => this.setState({resultError: error.message, loading: false}))
         })
         .catch(error => console.log(error));
     } else {
@@ -100,11 +94,10 @@ class ChooseMusic extends React.Component {
         this.props.client.mutate({ mutation: CLEAR_SELECTED_SONGS });
         return {
           search,
-          results: null,
+          nextPageExists: false,
           collection: [],
           loading: false,
           page: 0,
-          // clear: true
         };
       });
     }
@@ -164,8 +157,8 @@ class ChooseMusic extends React.Component {
   };
 
   _nextPage = () => {
-    let { search, page, results, collection, clear } = this.state;
-    if (!!results.next_href && !!search) {
+    let { search, page, nextPageExists, collection, clear } = this.state;
+    if (nextPageExists && !!search) {
       let nextPage = page + 1;
       this.setState((state, props) => {
         return {
@@ -176,53 +169,46 @@ class ChooseMusic extends React.Component {
         .then(nextPageResults => {
           this.setState((state, props) => {
             return {
-              results: nextPageResults,
+              nextPageExists: !!nextPageResults.next_href,
               collection: [...collection, ...nextPageResults.collection],
               loading: false,
               page: nextPage,
             };
           });
-          // if (clear) {
-          //     this.setState((state, props) => {
-          //         return {
-          //             results: null,
-          //             collection: [],
-          //             page: 0,
-          //             clear: false
-          //         }
-          //     })
-          // }
         })
         .catch(error => console.log(error));
     } else {
     }
-
-    // .catch(error => this.setState({nextPageError: error.message, buttonLoading: false}))
   };
 
   render() {
     const { search, loading, collection } = this.state;
     return (
-      <View style={{ backgroundColor: '#121619', flex: 1 }}>
-        <SearchBar
-          placeholder="Search in Soundcloud..."
-          onChangeText={this.updateSearch}
-          showLoading={loading}
-          value={search}
-          clearIcon={!!search}
-          onClear={() =>
-            this.setState((state, props) => {
-              this.props.client.mutate({ mutation: CLEAR_SELECTED_SONGS });
-              return {
-                results: null,
-                collection: [],
-                page: 0,
-                // clear: true
-              };
-            })
-          }
-        />
-        <ScrollView>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}
+      >
+        <View style={{ backgroundColor: '#121619', flex: 1 }}>
+          <SearchBar
+            placeholder="Search in Soundcloud..."
+            onChangeText={this.updateSearch}
+            showLoading={loading}
+            value={search}
+            clearIcon={!!search}
+            onClear={() =>
+              this.setState((state, props) => {
+                this.props.client.mutate({ mutation: CLEAR_SELECTED_SONGS });
+                return {
+                  nextPageExists: false,
+                  collection: [],
+                  page: 0,
+                };
+              })
+            }
+          />
           {!!collection && !!collection.length && (
             <FlatList
               keyExtractor={this._keyExtractor}
@@ -230,29 +216,10 @@ class ChooseMusic extends React.Component {
               renderItem={this.renderItem}
               extraData={this.state}
               onEndReached={() => this._nextPage()}
-              // ListFooterComponent={
-              //      <Button title={'title'} onPress={() => {console.log(this.state);return this._nextPage()}}/>
-              // }
             />
           )}
-        </ScrollView>
+        </View>
         <GlobalFooter />
-        {/*<Button*/}
-        {/*    title={'Show More'}*/}
-        {/*    onPress={() => this._nextPage()}*/}
-        {/*    loading={buttonLoading}*/}
-        {/*    */}
-        {/*/>*/}
-
-        {/*{*/}
-        {/*    !!results && !!results.collection && !!results.collection.length &&!!results.next_href &&*/}
-        {/*    <Button*/}
-        {/*        title={'Show More'}*/}
-        {/*        onPress={() => this._nextPage()}*/}
-        {/*        loading={buttonLoading}*/}
-        {/*    />*/}
-        {/*}*/}
-        {/*<Button title={'state'} onPress={() => console.log(this.state)}/>*/}
       </View>
     );
   }

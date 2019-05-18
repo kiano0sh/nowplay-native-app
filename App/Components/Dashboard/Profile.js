@@ -6,10 +6,14 @@ import GlobalFooter from '../MusicPlayer/GlobalFooter';
 class Profile extends Component {
   render() {
     return (
-      <View style={{ flex: 1 }}>
-        <ScrollView>
-          <Text>Hello Profile</Text>
-        </ScrollView>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Text>Hello Profile</Text>
         <GlobalFooter />
       </View>
     );
