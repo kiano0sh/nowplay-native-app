@@ -13,9 +13,6 @@
     "apollo-link-error": "^1.1.10",
     "formik": "^1.5.2",
     "graphql": "^14.2.0",
-    "joi": "^14.3.1",
-    "joi-phone-number": "^2.1.1",
-    "joi-react-native": "^2.0.1",
     "prop-types": "^15.7.2",
     "react": "16.8.3",
     "react-apollo": "^2.5.3",
@@ -29,8 +26,6 @@
     "react-native-video": "^4.4.1",
     "react-navigation": "^3.6.1",
     "react-navigation-material-bottom-tabs": "^1.0.0",
-    "react-redux": "^6.0.1",
-    "redux": "^4.0.1",
     "yup": "^0.27.0"
   },
   "devDependencies": {

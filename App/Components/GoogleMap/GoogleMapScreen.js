@@ -121,14 +121,12 @@ class GoogleMapScreen extends React.Component {
             },
           };
         });
-        return this._mapView.setCamera(
-          {
-            center: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            },
-          }
-        );
+        return this._mapView.setCamera({
+          center: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          },
+        });
       },
       error => console.log(error),
       {

@@ -156,46 +156,14 @@ export const MARK_DETAIL_BY_ID = gql`
   }
 `;
 
-export const MARK_DETAIL_BY_USER = gql`
-  query MusicMark($username: String!) {
-    musicMark(username: $username) {
+export const MARKS_BY_USERNAME = gql`
+  query musicMarkByUsername($username: String!) {
+    musicMarkByUsername(username: $username) {
       id
       title
       description
       longitude
       latitude
-      likedBy {
-        username
-      }
-      comments {
-        description
-        author {
-          username
-        }
-        createdAt
-      }
-      createdAt
-      user {
-        username
-        musicMarks {
-          id
-          longitude
-          latitude
-        }
-      }
-      musics {
-        id
-        title
-        createdAt
-        user {
-          username
-          musicMarks {
-            id
-            longitude
-            latitude
-          }
-        }
-      }
     }
   }
 `;
@@ -238,6 +206,18 @@ export const MARKS_AROUND = gql`
       maxradiuskm: $maxradiuskm
     ) {
       id
+      longitude
+      latitude
+    }
+  }
+`;
+
+export const MY_MUSIC_MARKS = gql`
+  query myMusicMarks($first: Int, $skip: Int) {
+    myMusicMarks(first: $first, skip: $skip) {
+      id
+      title
+      description
       longitude
       latitude
     }

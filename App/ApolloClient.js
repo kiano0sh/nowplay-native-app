@@ -69,7 +69,7 @@ cache.writeData({
     currentSongRef: null,
     currentPlaylist: null,
     playlistMode: false,
-    addedMark: null
+    addedMark: null,
   },
 });
 

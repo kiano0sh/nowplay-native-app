@@ -73,9 +73,16 @@ class MusicMarkDetails extends Component {
       })
       .then(({ data: { deleteMusicMark: { id } } }) => {
         this.setState({ isVisible: false });
-        return this.props.navigation.navigate('GoogleMapScreen', {
-          deletedMusicMarkId: id,
-        });
+        const profileMode = this.props.navigation.getParam('profileMode', null);
+        if (profileMode) {
+          return this.props.navigation.navigate('Profile', {
+            deletedMusicMarkId: id,
+          });
+        } else {
+          return this.props.navigation.navigate('GoogleMapScreen', {
+            deletedMusicMarkId: id,
+          });
+        }
       })
       .catch(err => {
         this.setState({ isVisible: false });
