@@ -116,39 +116,6 @@ const mainResolvers = {
   playCurrentSong: (root, args, { cache, client }) => {
     const { currentSong } = cache.readQuery({ query: GET_CURRENT_SONG });
 
-    // Seeking
-    MusicControl.enableControl('seekForward', false); // iOS only
-    MusicControl.enableControl('seekBackward', false); // iOS only
-    MusicControl.enableControl('seek', true); // Android only
-    MusicControl.enableControl('skipForward', false);
-    MusicControl.enableControl('skipBackward', false);
-
-    // Android Specific Options
-    MusicControl.enableControl('setRating', false);
-    MusicControl.enableControl('volume', true); // Only affected when remoteVolume is enabled
-    MusicControl.enableControl('remoteVolume', false);
-    MusicControl.enableControl('closeNotification', true, { when: 'paused' });
-
-    MusicControl.enableControl('play', true);
-    MusicControl.enableControl('pause', true);
-    MusicControl.enableControl('stop', false);
-    MusicControl.enableControl('nextTrack', true);
-    MusicControl.enableControl('previousTrack', true);
-
-    // listen to control callbacks
-    MusicControl.on('play', () =>
-      client.mutate({ mutation: PLAY_CURRENT_SONG }),
-    );
-    MusicControl.on('pause', () =>
-      client.mutate({ mutation: PAUSE_CURRENT_SONG }),
-    );
-    MusicControl.on('nextTrack', () =>
-      client.mutate({ mutation: PLAY_NEXT_SONG }),
-    );
-    MusicControl.on('previousTrack', () =>
-      client.mutate({ mutation: PLAY_PREVIOUS_SONG }),
-    );
-
     // update what's playing
     MusicControl.setNowPlaying({
       title: currentSong.title || '',
@@ -343,7 +310,6 @@ const mainResolvers = {
       data: { addedMark },
     });
     console.log(addedMark);
-
   },
 };
 

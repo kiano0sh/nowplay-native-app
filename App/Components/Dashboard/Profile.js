@@ -1,10 +1,20 @@
 import React, { Component } from 'react';
-import { View, ScrollView, Image, Dimensions, StyleSheet } from 'react-native';
-import { Text, Divider, Button } from 'react-native-elements';
+import {
+  View,
+  ScrollView,
+  Image,
+  Dimensions,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import { Text, Divider, Button, Icon } from 'react-native-elements';
 import GlobalFooter from '../MusicPlayer/GlobalFooter';
 import { withApollo, graphql, compose } from 'react-apollo';
 import { MY_MUSIC_MARKS, MARK_DETAIL_BY_ID } from '../../Queries/Qurey';
-import { SET_CURRENT_PLAYLIST } from '../../Queries/CacheQueries';
+import {
+  SET_CURRENT_PLAYLIST,
+  GET_ADDED_MARK,
+} from '../../Queries/CacheQueries';
 
 import MapView from 'react-native-maps';
 
@@ -55,6 +65,15 @@ class Profile extends Component {
       myMusicMarks.splice(indexOfDeletedMusicMark, 1);
       this.setState({
         myMusicMarks,
+      });
+    }
+
+    if (
+      this.props.addedMarkQuery.addedMark !== prevProps.addedMarkQuery.addedMark
+    ) {
+      const { addedMark } = this.props.addedMarkQuery;
+      this.setState({
+        marksAround: [addedMark, ...this.state.myMusicMarks],
       });
     }
   }
@@ -111,7 +130,7 @@ class Profile extends Component {
             {myMusicMarks.length
               ? myMusicMarks.map((mark, index) => {
                   return (
-                    <View style={styles.map} key={mark.id}>
+                    <TouchableOpacity style={styles.map} key={mark.id}>
                       <MapView
                         style={StyleSheet.absoluteFillObject}
                         scrollEnabled={false}
@@ -135,14 +154,18 @@ class Profile extends Component {
                         />
                       </MapView>
                       {/* <Divider style={{ backgroundColor: 'blue' }} /> */}
-                    </View>
+                    </TouchableOpacity>
                   );
                 })
               : null}
-            <Button
-              title={'show more'}
-              onPress={() => this.getMusicMarks(musicMarkPage + 1)}
-            />
+            <TouchableOpacity>
+              <Button
+                title={'More...'}
+                onPress={() => this.getMusicMarks(musicMarkPage + 1)}
+                type={'clear'}
+                titleStyle={{ color: 'rgba(0,0,0,0.4)' }}
+              />
+            </TouchableOpacity>
           </ScrollView>
         </View>
         <GlobalFooter />
@@ -153,6 +176,7 @@ class Profile extends Component {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#d9dadc',
     ...StyleSheet.absoluteFillObject,
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -162,11 +186,20 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   map: {
-    backgroundColor: '#000',
+    backgroundColor: '#16181c',
     width: '90%',
     height: 150,
     marginBottom: 5,
+    borderWidth: 2,
+    borderRadius: 5,
+    borderColor: '#696773',
   },
 });
 
-export default withApollo(Profile);
+export default compose(
+  withApollo,
+  graphql(GET_ADDED_MARK, {
+    options: { fetchPolicy: 'cache-only' },
+    name: 'addedMarkQuery',
+  }),
+)(Profile);
