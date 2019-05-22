@@ -7,18 +7,67 @@ import {
   GET_CURRENT_SONG,
   GET_CURRENT_SONGS,
   GET_PLAY_STATUS,
-  GET_SELECTED_SONGS,
   PLAY_CURRENT_SONG,
   UPDATE_CURRENT_STACK,
   UPDATE_SELECTED_SONGS,
   UPDATE_PLAYLIST_MODE,
 } from '../../Queries/CacheQueries';
-import { compose, graphql } from 'react-apollo';
 import { withApollo } from 'react-apollo';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import GlobalFooter from '../MusicPlayer/GlobalFooter';
 
-class ChooseMusic extends React.Component {
+class MyListItem extends React.PureComponent {
+  _onPress = () => {
+    this.props.onSelectSong(this.props.id);
+    this.props.updateSelectedSongs();
+  };
+
+  render() {
+    const textColor = this.props.selected ? '#00c853' : '#fff';
+    const { title, user, duration, artwork_url } = this.props;
+    return (
+      <ListItem
+        title={title}
+        subtitle={
+          <View>
+            <Text style={styles.soundcloudText}>
+              From Soundcloud by {user.username}.
+            </Text>
+          </View>
+        }
+        rightSubtitle={
+          <View style={styles.subtitleView}>
+            <Text style={styles.musicDuration}>
+              {(duration / 60000).toFixed(2).replace('.', ':')}
+            </Text>
+            <TouchableOpacity>
+              <Icon
+                type={'font-awesome'}
+                name={'check-circle'}
+                size={30}
+                color={textColor}
+                onPress={this._onPress}
+              />
+            </TouchableOpacity>
+          </View>
+        }
+        titleStyle={{ color: 'white', fontWeight: 'bold' }}
+        leftAvatar={{
+          source: !!artwork_url
+            ? { uri: artwork_url }
+            : { uri: user.avatar_url },
+          rounded: false,
+          size: 'large',
+        }}
+        bottomDivider
+        containerStyle={{ backgroundColor: '#121619' }}
+        onPress={() => this.props.onPressItem()}
+      />
+    );
+  }
+}
+
+class ChooseMusic extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -28,7 +77,7 @@ class ChooseMusic extends React.Component {
       loading: false,
       // TODO after pressing clear button while data is fetching an amount of data remains in state!
       page: 0,
-      selectedSongs: [],
+      selected: (new Map(): Map<string, boolean>),
     };
   }
 
@@ -52,22 +101,11 @@ class ChooseMusic extends React.Component {
   }
 
   // add selected track to state
-  _selectSong(selectedSong) {
+  _updateSelectedSongs(selectedSong) {
     this.props.client.mutate({
       mutation: UPDATE_SELECTED_SONGS,
       variables: { selectedSong },
     });
-  }
-
-  // find out about existence of item in our selectedSongs
-  // TODO needs a better and faster way
-  _isItemSelected(id) {
-    const { selectedSongs } = this.props.selectedSongsQuery;
-    if (selectedSongs && selectedSongs.find(item => item.id === id)) {
-      return '#00c853';
-    } else {
-      return 'white';
-    }
   }
 
   updateSearch = search => {
@@ -103,45 +141,29 @@ class ChooseMusic extends React.Component {
     }
   };
 
+  _onSelectSong = (id: string) => {
+    // updater functions are preferred for transactional updates
+    this.setState(state => {
+      // copy the map rather than modifying state.
+      const selected = new Map(state.selected);
+      selected.set(id, !selected.get(id)); // toggle
+      return { selected };
+    });
+  };
+
   _keyExtractor = (item, index) => `item-${index}`;
 
   renderItem = ({ item }) => (
-    <ListItem
+    <MyListItem
+      id={item.id}
+      onSelectSong={this._onSelectSong}
+      updateSelectedSongs={() => this._updateSelectedSongs(item)}
+      onPressItem={() => this._updateStack(item)}
+      selected={!!this.state.selected.get(item.id)}
       title={item.title}
-      subtitle={
-        <View>
-          <Text style={styles.soundcloudText}>
-            From Soundcloud by {item.user.username}.
-          </Text>
-        </View>
-      }
-      rightSubtitle={
-        <View style={styles.subtitleView}>
-          <Text style={styles.musicDuration}>
-            {(item.duration / 60000).toFixed(2).replace('.', ':')}
-          </Text>
-          <TouchableOpacity>
-            <Icon
-              type={'font-awesome'}
-              name={'check-circle'}
-              size={30}
-              color={this._isItemSelected(item.id)}
-              onPress={() => this._selectSong(item)}
-            />
-          </TouchableOpacity>
-        </View>
-      }
-      titleStyle={{ color: 'white', fontWeight: 'bold' }}
-      leftAvatar={{
-        source: !!item.artwork_url
-          ? { uri: item.artwork_url }
-          : { uri: item.user.avatar_url },
-        rounded: false,
-        size: 'large',
-      }}
-      bottomDivider
-      containerStyle={{ backgroundColor: '#121619' }}
-      onPress={() => this._updateStack(item)}
+      user={item.user}
+      duration={item.duration}
+      artwork_url={item.artwork_url}
     />
   );
 
@@ -225,14 +247,7 @@ class ChooseMusic extends React.Component {
   }
 }
 
-// export default withApollo(ChooseMusic);
-export default compose(
-  withApollo,
-  graphql(GET_SELECTED_SONGS, {
-    options: { fetchPolicy: 'cache-only' },
-    name: 'selectedSongsQuery',
-  }),
-)(ChooseMusic);
+export default withApollo(ChooseMusic);
 
 const styles = StyleSheet.create({
   container: {

@@ -215,25 +215,25 @@ const mainResolvers = {
 
     let selectedSongsShadow = Object.assign([], selectedSongs);
 
-    let customItem = {
-      __typename: 'SelectedMusic',
-      id: selectedSong.id,
-      trackService: 'Soundcloud',
-      title: selectedSong.title,
-      artwork: !!selectedSong.artwork_url
-        ? selectedSong.artwork_url
-        : selectedSong.user.avatar_url,
-      artist: selectedSong.user.username,
-      genre: selectedSong.genre || null,
-      duration: selectedSong.duration,
-      trackCreatedAt: selectedSong.created_at,
-    };
-
     let itemIndex = selectedSongsShadow.findIndex(
-      element => element.id === customItem.id,
+      element => element.id === selectedSong.id,
     );
 
     if (itemIndex === -1) {
+      let customItem = {
+        __typename: 'SelectedMusic',
+        id: selectedSong.id,
+        trackService: 'Soundcloud',
+        title: selectedSong.title,
+        artwork: !!selectedSong.artwork_url
+          ? selectedSong.artwork_url
+          : selectedSong.user.avatar_url,
+        artist: selectedSong.user.username,
+        genre: selectedSong.genre || null,
+        duration: selectedSong.duration,
+        trackCreatedAt: selectedSong.created_at,
+      };
+
       selectedSongsShadow.push(customItem);
     } else {
       selectedSongsShadow.splice(itemIndex, 1);
@@ -309,7 +309,6 @@ const mainResolvers = {
       query: GET_ADDED_MARK,
       data: { addedMark },
     });
-    console.log(addedMark);
   },
 };
 

@@ -137,7 +137,6 @@ class GoogleMapScreen extends React.Component {
   };
 
   updateSearch = search => {
-    console.log(search);
     this.setState({ search });
   };
 
@@ -162,6 +161,7 @@ class GoogleMapScreen extends React.Component {
       .query({
         query: MARK_DETAIL_BY_ID,
         variables: { musicMarkId },
+        fetchPolicy: 'no-cache',
       })
       .then(markDetails =>
         this.props.client
@@ -202,7 +202,6 @@ class GoogleMapScreen extends React.Component {
   };
 
   onMarkerPress = marker => {
-    console.log(marker.nativeEvent);
     const { coordinate } = marker.nativeEvent;
     this.props.client.mutate({
       mutation: UPDATE_CURRENT_MARK_LOCATION,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity, Keyboard } from 'react-native';
-import { Text, Icon, Overlay } from 'react-native-elements';
+import { Text, Icon, Overlay, Button } from 'react-native-elements';
 import {
   GET_PLAY_STATUS,
   GET_CURRENT_SONGS,
@@ -31,6 +31,7 @@ class GlobalFooter extends React.Component {
     super(props);
     this.state = {
       footerVisible: true,
+      addLoading: false,
     };
   }
 
@@ -76,11 +77,11 @@ class GlobalFooter extends React.Component {
   };
 
   _addMusicMark() {
-    console.log('ima here');
     const {
       currentMarkLocationQuery: { currentMarkLocation },
       selectedSongsQuery: { selectedSongs },
     } = this.props;
+    this.setState({ addLoading: true });
     this.props.client
       .mutate({
         mutation: CREATE_MUSIC_MARK,
@@ -100,21 +101,27 @@ class GlobalFooter extends React.Component {
             };
           }),
         },
+        fetchPolicy: 'no-cache',
       })
       .then(({ data: { createMusicMark } }) => {
-        this.getMusicMarkDetails(createMusicMark);
-        this.props.client.mutate({
-          mutation: UPDATE_ADDED_MARK,
-          variables: {
-            addedMark: {
-              id: createMusicMark.id,
-              latitude: createMusicMark.latitude,
-              longitude: createMusicMark.longitude,
+        this.props.client
+          .mutate({
+            mutation: UPDATE_ADDED_MARK,
+            variables: {
+              addedMark: {
+                id: createMusicMark.id,
+                latitude: createMusicMark.latitude,
+                longitude: createMusicMark.longitude,
+              },
             },
-          },
-        });
+          })
+          .then(data => this.setState({ addLoading: false }));
+        this.getMusicMarkDetails(createMusicMark);
       })
-      .catch(err => alert(err));
+      .catch(err => {
+        this.setState({ addLoading: false });
+        return alert(err);
+      });
   }
 
   _addMusic() {
@@ -126,8 +133,7 @@ class GlobalFooter extends React.Component {
     } = this.props.client.readQuery({
       query: GET_CURRENT_PLAYLIST,
     });
-    console.log(selectedSongs);
-
+    this.setState({ addLoading: true });
     this.props.client
       .mutate({
         mutation: ADD_MUSIC,
@@ -146,19 +152,25 @@ class GlobalFooter extends React.Component {
             };
           }),
         },
+        fetchPolicy: 'no-cache',
       })
       .then(result => {
         const {
           data: { addMusic },
         } = result;
         // TODO better solution
-        this.props.client.mutate({
-          mutation: SET_CURRENT_PLAYLIST,
-          variables: { currentPlaylist: addMusic },
-        });
+        this.props.client
+          .mutate({
+            mutation: SET_CURRENT_PLAYLIST,
+            variables: { currentPlaylist: addMusic },
+          })
+          .then(data => this.setState({ addLoading: false }));
         return NavigationService.navigate('MusicMarkDetails');
       })
-      .catch(err => alert(err));
+      .catch(err => {
+        this.setState({ addLoading: false });
+        return alert(err);
+      });
   }
 
   getMusicMarkDetails = currentPlaylist => {
@@ -178,6 +190,7 @@ class GlobalFooter extends React.Component {
       playlistModeQuery: { playlistMode },
       selectedSongsQuery: { selectedSongs },
     } = this.props;
+    const { addLoading } = this.state;
     return (
       <View style={{ marginBottom: -4 }}>
         {selectedSongs.length ? (
@@ -188,15 +201,26 @@ class GlobalFooter extends React.Component {
                   {selectedSongs.length} song is selected.
                 </Text>
                 <View style={styles.addMusicButtonView}>
-                  <Text
+                  {/* <Text
                     style={styles.addMusicButton}
                     onPress={() =>
                       playlistMode ? this._addMusic() : this._addMusicMark()
                     }
                   >
                     Add
-                  </Text>
-                  <Icon type={'font-awesome'} name={'plus-circle'} />
+                  </Text> */}
+                  <Button
+                    title={'Add'}
+                    loading={addLoading}
+                    onPress={() =>
+                      playlistMode ? this._addMusic() : this._addMusicMark()
+                    }
+                    titleStyle={styles.addMusicTitle}
+                    buttonStyle={{ padding: 0 }}
+                    type="clear"
+                    loadingProps={{color: "#000"}}
+                  />
+                  {/* {addLoading ? : <Icon type={'font-awesome'} name={'plus-circle'} /> */}
                 </View>
               </View>
             </View>
@@ -281,8 +305,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginRight: 10,
   },
-  addMusicButton: {
-    marginRight: 5,
+  addMusicTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',

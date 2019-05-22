@@ -70,7 +70,8 @@ const AddMusicMarkStack = createStackNavigator({
 
 const ProfileStack = createStackNavigator({
   Profile,
-  MusicMarkDetails
+  MusicMarkDetails,
+  ChooseMusic
 });
 
 const TabNavigator = createMaterialBottomTabNavigator(

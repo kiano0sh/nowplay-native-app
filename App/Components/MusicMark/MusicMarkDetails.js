@@ -91,8 +91,6 @@ class MusicMarkDetails extends Component {
   };
 
   _updateStack = index => {
-    console.log(index);
-
     this.props.client.mutate({
       mutation: UPDATE_CURRENT_PLAYLIST_SONG,
       variables: { index },

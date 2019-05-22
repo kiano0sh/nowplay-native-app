@@ -101,6 +101,7 @@ class Profile extends Component {
       .query({
         query: MARK_DETAIL_BY_ID,
         variables: { musicMarkId },
+        fetchPolicy: 'no-cache',
       })
       .then(markDetails =>
         this.props.client

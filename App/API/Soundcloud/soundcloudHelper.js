@@ -6,8 +6,6 @@ export const soundcloudSearch = (query, page = 0, limit = 10) => {
       limit}&linked_partitioning=1`,
   )
     .then(res => {
-      console.log(res);
-
       return res.json();
     })
     .then(
