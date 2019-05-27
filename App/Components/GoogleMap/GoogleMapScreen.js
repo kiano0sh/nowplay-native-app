@@ -87,6 +87,13 @@ class GoogleMapScreen extends React.Component {
     }
   }
 
+  // shouldComponentUpdate(nextProps) {
+  //   return (
+  //     nextProps.latitude !== this.props.latitude &&
+  //     nextProps.longitude !== this.props.longitude
+  //   );
+  // }
+
   requestLocationPermission = async () => {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -141,14 +148,15 @@ class GoogleMapScreen extends React.Component {
   };
 
   getOtherMarks = newRegion => {
-    let { longitude, latitude } = newRegion;
+    const { longitude, latitude } = newRegion;
+    const { marksAround } = this.state;
     this.props.client
       .query({
         query: MARKS_AROUND,
         variables: {
           longitude: Number(longitude.toFixed(5)),
           latitude: Number(latitude.toFixed(5)),
-          maxradiuskm: 50,
+          maxradiuskm: 10,
         },
         fetchPolicy: 'no-cache',
       })
@@ -257,6 +265,7 @@ class GoogleMapScreen extends React.Component {
                     onPress={() =>
                       !addMode ? this.getMusicMarkDetails(mark.id) : null
                     }
+                    tracksViewChanges={false}
                   >
                     <Icon
                       type={'material-community'}
