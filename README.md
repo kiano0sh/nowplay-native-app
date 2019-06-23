@@ -1,5 +1,5 @@
 # Nowplay Front-end
-This is the front-end of Nowplay App. For working with this app you first need to start up the [back-end](https://github.com/kiano0sh/nowplay-backend).
+This is the front-end of Nowplay project. For working with this app you first need to start up the [back-end](https://github.com/kiano0sh/nowplay-backend).
 
 ## Setup
 
