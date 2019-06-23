@@ -7,7 +7,7 @@ This is the front-end of Nowplay App. For working with this app you first need t
 - Node.js
 - Npm
 - react-native
-- AVD or Real Dvice
+- AVD or Real Device
 
 ## Install
 
