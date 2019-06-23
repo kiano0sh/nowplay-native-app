@@ -1,21 +1,20 @@
-# Nowplay Back-end
-This is the back-end of Nowplay App.
+# Nowplay Front-end
+This is the front-end of Nowplay App. For working with this app you first need to start up the [back-end](https://github.com/kiano0sh/nowplay-backend).
 
 ## Setup
 
 ### Requirements
 - Node.js
 - Npm
-- Prisma CLI
+- react-native
+- AVD or Real Dvice
 
 ## Install
 
 ```sh
-$ docker-compose up -d
-$ prisma deploy
 $ npm i
 ```
 ### How does it work
 ```sh
-$ npm start
+$ react-native run-android
 ```
