@@ -1,7 +1,8 @@
 {
   "name": "NowplayApp",
   "version": "0.0.1",
-  "private": true,
+  "author": "kian00sh",
+  "license": "GPLv3",
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest",
